@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Install data dependencies
-        run: python -m pip install --disable-pip-version-check pandas lxml requests
+        run: python -m pip install --disable-pip-version-check pandas lxml html5lib beautifulsoup4 requests
 
       - name: Update SuperEnalotto data
         run: python scripts/update_data.py

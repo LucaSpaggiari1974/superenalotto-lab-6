@@ -33,6 +33,7 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 <div class="result">
 <strong>Combinazione</strong>
 <div class="balls" id="result"><span style="color:#9ca3af">—</span></div>
+<div id="analysis" class="hint" style="margin-top:12px">Genera una combinazione per vedere il criterio.</div>
 </div>
 <div class="status" id="status">Aggiornamento dati in corso…</div>
 <p class="hint">I dati vengono richiesti nuovamente ogni volta che apri l'app. Le statistiche descrivono le estrazioni passate e non prevedono i risultati futuri.</p>
@@ -67,6 +68,7 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 <script>
 const grid=document.getElementById("grid"),count=document.getElementById("count"),result=document.getElementById("result");
 let selected=new Set();
+let statsMap=new Map();
 for(let n=1;n<=90;n++){
  const b=document.createElement("button");b.className="num";b.textContent=n;
  b.addEventListener("click",()=>{if(selected.has(n)){selected.delete(n);b.classList.remove("sel")}else if(selected.size<6){selected.add(n);b.classList.add("sel")}update()});
@@ -76,7 +78,7 @@ function update(){count.textContent=selected.size+" / 6 selezionati"}
 function show(nums){result.innerHTML=nums.map(n=>'<span class="ball">'+n+'</span>').join("")}
 document.getElementById("generate").addEventListener("click",()=>{
  let a=Array.from(selected);
- if(a.length<6){a=Array.from({length:90},(_,i)=>i+1).sort(()=>Math.random()-.5).slice(0,6)}
+ if(a.length<6){a=smartGenerate()}
  a.sort((x,y)=>x-y);show(a);
 });
 document.getElementById("reset").addEventListener("click",()=>{
@@ -86,6 +88,7 @@ document.getElementById("reset").addEventListener("click",()=>{
 function statLine(s){return '<div class="statline"><span><strong>'+s.numero+'</strong></span><span>'+s.valore+'</span></div>'}
 function renderData(data){
  const stats=data.stats||[];
+ statsMap=new Map(stats.map(s=>[+s.numero,s]));
  const byFreq=[...stats].sort((a,b)=>(b.frequenza||0)-(a.frequenza||0)).slice(0,6).map(s=>({numero:s.numero,valore:s.frequenza})).map(statLine).join("");
  const byDelay=[...stats].sort((a,b)=>(b.ritardo||0)-(a.ritardo||0)).slice(0,6).map(s=>({numero:s.numero,valore:s.ritardo})).map(statLine).join("");
  document.getElementById("hot").innerHTML=byFreq||"—";

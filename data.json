@@ -1,0 +1,680 @@
+{
+  "updated_at": "2026-09-20T21:00:00+02:00",
+  "source": "SuperEnalotto.it - statistiche ufficiali",
+  "stats": [
+    {
+      "numero": 1,
+      "frequenza": 301,
+      "ritardo": 13,
+      "ritardo_massimo": 90
+    },
+    {
+      "numero": 2,
+      "frequenza": 266,
+      "ritardo": 2,
+      "ritardo_massimo": 96
+    },
+    {
+      "numero": 3,
+      "frequenza": 272,
+      "ritardo": 29,
+      "ritardo_massimo": 78
+    },
+    {
+      "numero": 4,
+      "frequenza": 276,
+      "ritardo": 1,
+      "ritardo_massimo": 89
+    },
+    {
+      "numero": 5,
+      "frequenza": 265,
+      "ritardo": 57,
+      "ritardo_massimo": 111
+    },
+    {
+      "numero": 6,
+      "frequenza": 319,
+      "ritardo": 17,
+      "ritardo_massimo": 67
+    },
+    {
+      "numero": 7,
+      "frequenza": 268,
+      "ritardo": 10,
+      "ritardo_massimo": 98
+    },
+    {
+      "numero": 8,
+      "frequenza": 286,
+      "ritardo": 1,
+      "ritardo_massimo": 100
+    },
+    {
+      "numero": 9,
+      "frequenza": 271,
+      "ritardo": 9,
+      "ritardo_massimo": 64
+    },
+    {
+      "numero": 10,
+      "frequenza": 276,
+      "ritardo": 7,
+      "ritardo_massimo": 102
+    },
+    {
+      "numero": 11,
+      "frequenza": 283,
+      "ritardo": 14,
+      "ritardo_massimo": 76
+    },
+    {
+      "numero": 12,
+      "frequenza": 265,
+      "ritardo": 0,
+      "ritardo_massimo": 100
+    },
+    {
+      "numero": 13,
+      "frequenza": 265,
+      "ritardo": 23,
+      "ritardo_massimo": 91
+    },
+    {
+      "numero": 14,
+      "frequenza": 273,
+      "ritardo": 6,
+      "ritardo_massimo": 73
+    },
+    {
+      "numero": 15,
+      "frequenza": 279,
+      "ritardo": 3,
+      "ritardo_massimo": 75
+    },
+    {
+      "numero": 16,
+      "frequenza": 280,
+      "ritardo": 4,
+      "ritardo_massimo": 79
+    },
+    {
+      "numero": 17,
+      "frequenza": 289,
+      "ritardo": 0,
+      "ritardo_massimo": 76
+    },
+    {
+      "numero": 18,
+      "frequenza": 259,
+      "ritardo": 6,
+      "ritardo_massimo": 108
+    },
+    {
+      "numero": 19,
+      "frequenza": 300,
+      "ritardo": 11,
+      "ritardo_massimo": 86
+    },
+    {
+      "numero": 20,
+      "frequenza": 282,
+      "ritardo": 9,
+      "ritardo_massimo": 100
+    },
+    {
+      "numero": 21,
+      "frequenza": 285,
+      "ritardo": 16,
+      "ritardo_massimo": 116
+    },
+    {
+      "numero": 22,
+      "frequenza": 280,
+      "ritardo": 22,
+      "ritardo_massimo": 77
+    },
+    {
+      "numero": 23,
+      "frequenza": 266,
+      "ritardo": 4,
+      "ritardo_massimo": 71
+    },
+    {
+      "numero": 24,
+      "frequenza": 258,
+      "ritardo": 7,
+      "ritardo_massimo": 127
+    },
+    {
+      "numero": 25,
+      "frequenza": 291,
+      "ritardo": 5,
+      "ritardo_massimo": 72
+    },
+    {
+      "numero": 26,
+      "frequenza": 266,
+      "ritardo": 6,
+      "ritardo_massimo": 95
+    },
+    {
+      "numero": 27,
+      "frequenza": 265,
+      "ritardo": 1,
+      "ritardo_massimo": 107
+    },
+    {
+      "numero": 28,
+      "frequenza": 275,
+      "ritardo": 2,
+      "ritardo_massimo": 115
+    },
+    {
+      "numero": 29,
+      "frequenza": 266,
+      "ritardo": 10,
+      "ritardo_massimo": 83
+    },
+    {
+      "numero": 30,
+      "frequenza": 269,
+      "ritardo": 31,
+      "ritardo_massimo": 122
+    },
+    {
+      "numero": 31,
+      "frequenza": 272,
+      "ritardo": 4,
+      "ritardo_massimo": 113
+    },
+    {
+      "numero": 32,
+      "frequenza": 288,
+      "ritardo": 13,
+      "ritardo_massimo": 94
+    },
+    {
+      "numero": 33,
+      "frequenza": 285,
+      "ritardo": 14,
+      "ritardo_massimo": 84
+    },
+    {
+      "numero": 34,
+      "frequenza": 274,
+      "ritardo": 20,
+      "ritardo_massimo": 84
+    },
+    {
+      "numero": 35,
+      "frequenza": 278,
+      "ritardo": 43,
+      "ritardo_massimo": 87
+    },
+    {
+      "numero": 36,
+      "frequenza": 251,
+      "ritardo": 3,
+      "ritardo_massimo": 111
+    },
+    {
+      "numero": 37,
+      "frequenza": 283,
+      "ritardo": 32,
+      "ritardo_massimo": 71
+    },
+    {
+      "numero": 38,
+      "frequenza": 289,
+      "ritardo": 11,
+      "ritardo_massimo": 75
+    },
+    {
+      "numero": 39,
+      "frequenza": 298,
+      "ritardo": 5,
+      "ritardo_massimo": 76
+    },
+    {
+      "numero": 40,
+      "frequenza": 292,
+      "ritardo": 21,
+      "ritardo_massimo": 71
+    },
+    {
+      "numero": 41,
+      "frequenza": 292,
+      "ritardo": 55,
+      "ritardo_massimo": 58
+    },
+    {
+      "numero": 42,
+      "frequenza": 287,
+      "ritardo": 45,
+      "ritardo_massimo": 88
+    },
+    {
+      "numero": 43,
+      "frequenza": 296,
+      "ritardo": 19,
+      "ritardo_massimo": 107
+    },
+    {
+      "numero": 44,
+      "frequenza": 263,
+      "ritardo": 27,
+      "ritardo_massimo": 109
+    },
+    {
+      "numero": 45,
+      "frequenza": 306,
+      "ritardo": 0,
+      "ritardo_massimo": 126
+    },
+    {
+      "numero": 46,
+      "frequenza": 267,
+      "ritardo": 26,
+      "ritardo_massimo": 92
+    },
+    {
+      "numero": 47,
+      "frequenza": 292,
+      "ritardo": 18,
+      "ritardo_massimo": 83
+    },
+    {
+      "numero": 48,
+      "frequenza": 284,
+      "ritardo": 66,
+      "ritardo_massimo": 97
+    },
+    {
+      "numero": 49,
+      "frequenza": 313,
+      "ritardo": 15,
+      "ritardo_massimo": 94
+    },
+    {
+      "numero": 50,
+      "frequenza": 241,
+      "ritardo": 2,
+      "ritardo_massimo": 93
+    },
+    {
+      "numero": 51,
+      "frequenza": 296,
+      "ritardo": 6,
+      "ritardo_massimo": 84
+    },
+    {
+      "numero": 52,
+      "frequenza": 305,
+      "ritardo": 24,
+      "ritardo_massimo": 62
+    },
+    {
+      "numero": 53,
+      "frequenza": 256,
+      "ritardo": 9,
+      "ritardo_massimo": 85
+    },
+    {
+      "numero": 54,
+      "frequenza": 286,
+      "ritardo": 19,
+      "ritardo_massimo": 67
+    },
+    {
+      "numero": 55,
+      "frequenza": 313,
+      "ritardo": 12,
+      "ritardo_massimo": 80
+    },
+    {
+      "numero": 56,
+      "frequenza": 293,
+      "ritardo": 15,
+      "ritardo_massimo": 88
+    },
+    {
+      "numero": 57,
+      "frequenza": 275,
+      "ritardo": 5,
+      "ritardo_massimo": 87
+    },
+    {
+      "numero": 58,
+      "frequenza": 277,
+      "ritardo": 15,
+      "ritardo_massimo": 77
+    },
+    {
+      "numero": 59,
+      "frequenza": 264,
+      "ritardo": 0,
+      "ritardo_massimo": 74
+    },
+    {
+      "numero": 60,
+      "frequenza": 256,
+      "ritardo": 13,
+      "ritardo_massimo": 100
+    },
+    {
+      "numero": 61,
+      "frequenza": 283,
+      "ritardo": 12,
+      "ritardo_massimo": 90
+    },
+    {
+      "numero": 62,
+      "frequenza": 299,
+      "ritardo": 1,
+      "ritardo_massimo": 74
+    },
+    {
+      "numero": 63,
+      "frequenza": 300,
+      "ritardo": 13,
+      "ritardo_massimo": 81
+    },
+    {
+      "numero": 64,
+      "frequenza": 269,
+      "ritardo": 6,
+      "ritardo_massimo": 112
+    },
+    {
+      "numero": 65,
+      "frequenza": 294,
+      "ritardo": 25,
+      "ritardo_massimo": 70
+    },
+    {
+      "numero": 66,
+      "frequenza": 299,
+      "ritardo": 7,
+      "ritardo_massimo": 61
+    },
+    {
+      "numero": 67,
+      "frequenza": 264,
+      "ritardo": 3,
+      "ritardo_massimo": 93
+    },
+    {
+      "numero": 68,
+      "frequenza": 306,
+      "ritardo": 33,
+      "ritardo_massimo": 68
+    },
+    {
+      "numero": 69,
+      "frequenza": 276,
+      "ritardo": 3,
+      "ritardo_massimo": 90
+    },
+    {
+      "numero": 70,
+      "frequenza": 260,
+      "ritardo": 1,
+      "ritardo_massimo": 112
+    },
+    {
+      "numero": 71,
+      "frequenza": 287,
+      "ritardo": 6,
+      "ritardo_massimo": 81
+    },
+    {
+      "numero": 72,
+      "frequenza": 291,
+      "ritardo": 4,
+      "ritardo_massimo": 94
+    },
+    {
+      "numero": 73,
+      "frequenza": 282,
+      "ritardo": 8,
+      "ritardo_massimo": 114
+    },
+    {
+      "numero": 74,
+      "frequenza": 285,
+      "ritardo": 0,
+      "ritardo_massimo": 110
+    },
+    {
+      "numero": 75,
+      "frequenza": 294,
+      "ritardo": 2,
+      "ritardo_massimo": 66
+    },
+    {
+      "numero": 76,
+      "frequenza": 275,
+      "ritardo": 15,
+      "ritardo_massimo": 85
+    },
+    {
+      "numero": 77,
+      "frequenza": 306,
+      "ritardo": 0,
+      "ritardo_massimo": 85
+    },
+    {
+      "numero": 78,
+      "frequenza": 270,
+      "ritardo": 15,
+      "ritardo_massimo": 104
+    },
+    {
+      "numero": 79,
+      "frequenza": 315,
+      "ritardo": 1,
+      "ritardo_massimo": 60
+    },
+    {
+      "numero": 80,
+      "frequenza": 309,
+      "ritardo": 27,
+      "ritardo_massimo": 62
+    },
+    {
+      "numero": 81,
+      "frequenza": 310,
+      "ritardo": 41,
+      "ritardo_massimo": 101
+    },
+    {
+      "numero": 82,
+      "frequenza": 304,
+      "ritardo": 8,
+      "ritardo_massimo": 62
+    },
+    {
+      "numero": 83,
+      "frequenza": 312,
+      "ritardo": 14,
+      "ritardo_massimo": 90
+    },
+    {
+      "numero": 84,
+      "frequenza": 280,
+      "ritardo": 2,
+      "ritardo_massimo": 147
+    },
+    {
+      "numero": 85,
+      "frequenza": 328,
+      "ritardo": 4,
+      "ritardo_massimo": 81
+    },
+    {
+      "numero": 86,
+      "frequenza": 313,
+      "ritardo": 24,
+      "ritardo_massimo": 73
+    },
+    {
+      "numero": 87,
+      "frequenza": 291,
+      "ritardo": 42,
+      "ritardo_massimo": 82
+    },
+    {
+      "numero": 88,
+      "frequenza": 298,
+      "ritardo": 16,
+      "ritardo_massimo": 68
+    },
+    {
+      "numero": 89,
+      "frequenza": 278,
+      "ritardo": 18,
+      "ritardo_massimo": 85
+    },
+    {
+      "numero": 90,
+      "frequenza": 302,
+      "ritardo": 9,
+      "ritardo_massimo": 87
+    }
+  ],
+  "ultime_estrazioni": [
+    {
+      "descrizione": "Concorso Nº 151 del 19 Settembre 2026",
+      "numeri": [
+        20,
+        42,
+        45,
+        48,
+        68,
+        85
+      ]
+    },
+    {
+      "descrizione": "Concorso Nº 150 del 18 Settembre 2026",
+      "numeri": [
+        29,
+        37,
+        41,
+        43,
+        74,
+        86
+      ]
+    },
+    {
+      "descrizione": "Concorso Nº 149 del 17 Settembre 2026",
+      "numeri": [
+        6,
+        7,
+        16,
+        35,
+        46,
+        54
+      ]
+    },
+    {
+      "descrizione": "Concorso Nº 148 del 15 Settembre 2026",
+      "numeri": [
+        3,
+        12,
+        18,
+        32,
+        47,
+        54
+      ]
+    },
+    {
+      "descrizione": "Concorso Nº 147 del 12 Settembre 2026",
+      "numeri": [
+        3,
+        7,
+        14,
+        40,
+        78,
+        81
+      ]
+    },
+    {
+      "descrizione": "Concorso Nº 146 del 11 Settembre 2026",
+      "numeri": [
+        8,
+        13,
+        16,
+        52,
+        64,
+        70
+      ]
+    },
+    {
+      "descrizione": "Concorso Nº 145 del 10 Settembre 2026",
+      "numeri": [
+        2,
+        17,
+        39,
+        59,
+        63,
+        89
+      ]
+    },
+    {
+      "descrizione": "Concorso Nº 144 del 8 Settembre 2026",
+      "numeri": [
+        23,
+        26,
+        41,
+        52,
+        59,
+        85
+      ]
+    },
+    {
+      "descrizione": "Concorso Nº 143 del 5 Settembre 2026",
+      "numeri": [
+        12,
+        24,
+        28,
+        32,
+        37,
+        78
+      ]
+    },
+    {
+      "descrizione": "Concorso Nº 142 del 4 Settembre 2026",
+      "numeri": [
+        8,
+        44,
+        60,
+        73,
+        86,
+        89
+      ]
+    },
+    {
+      "descrizione": "Concorso Nº 141 del 3 Settembre 2026",
+      "numeri": [
+        8,
+        11,
+        15,
+        60,
+        68,
+        76
+      ]
+    },
+    {
+      "descrizione": "Concorso Nº 140 del 1 Settembre 2026",
+      "numeri": [
+        42,
+        47,
+        59,
+        64,
+        67,
+        71
+      ]
+    }
+  ]
+}

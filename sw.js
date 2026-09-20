@@ -1,11 +1,13 @@
-const CACHE="lab6-v3";
-self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(["./","./index.html","./manifest.webmanifest","./sw.js"]))));
-self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));
+const CACHE="lab6-v8";
+self.addEventListener("install",e=>e.waitUntil(self.skipWaiting()));
+self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener("fetch",e=>{
-  const url=new URL(e.request.url);
-  if(url.pathname.endsWith("/data.json")){
-    e.respondWith(fetch(e.request,{cache:"no-store"}).catch(()=>caches.match("./data.json")));
-    return;
+  const u=new URL(e.request.url);
+  if(e.request.method!=="GET"){return}
+  if(u.pathname.endsWith("/data.json")){
+    e.respondWith(fetch(e.request,{cache:"no-store"}).catch(()=>caches.match("./data.json"))); return;
   }
-  e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match("./index.html"))));
+  if(e.request.mode==="navigate" || u.pathname.endsWith("/index.html")){
+    e.respondWith(fetch(e.request,{cache:"no-store"}).catch(()=>caches.match("./index.html"))); return;
+  }
 });

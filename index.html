@@ -34,6 +34,7 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 <strong>Combinazione</strong>
 <div class="balls" id="result"><span style="color:#9ca3af">—</span></div>
 <div id="analysis" class="hint" style="margin-top:12px">Genera una combinazione per vedere il criterio.</div>
+<div id="analysis" class="hint" style="margin-top:12px">Genera una combinazione per vedere il criterio.</div>
 </div>
 <div class="status" id="status">Aggiornamento dati in corso…</div>
 <p class="hint">I dati vengono richiesti nuovamente ogni volta che apri l'app. Le statistiche descrivono le estrazioni passate e non prevedono i risultati futuri.</p>
@@ -75,14 +76,43 @@ for(let n=1;n<=90;n++){
  grid.appendChild(b);
 }
 function update(){count.textContent=selected.size+" / 6 selezionati"}
-function show(nums){result.innerHTML=nums.map(n=>'<span class="ball">'+n+'</span>').join("")}
+function show(nums){result.innerHTML=nums.map(n=>'<span class="ball">'+n+'</span>').join(""); analyze(nums)}
+function analyze(nums){
+ const ss=nums.map(n=>statsMap.get(n)).filter(Boolean);
+ if(!ss.length){document.getElementById("analysis").textContent="Analisi statistica non disponibile.";return}
+ const freq=ss.reduce((a,s)=>a+(+s.frequenza||0),0);
+ const delay=ss.reduce((a,s)=>a+(+s.ritardo||0),0);
+ const odd=nums.filter(n=>n%2).length;
+ const low=nums.filter(n=>n<=45).length;
+ const sum=nums.reduce((a,b)=>a+b,0);
+ document.getElementById("analysis").innerHTML="<strong>Criterio:</strong> frequenza storica + ritardo + distribuzione.<br>Frequenza totale: "+freq+" · Ritardo totale: "+delay+"<br>Pari/dispari: "+(6-odd)+"/"+odd+" · 1–45 / 46–90: "+low+"/"+(6-low)+" · Somma: "+sum+"<br><strong>Nota:</strong> lo storico non aumenta la probabilità reale dell'estrazione."
+}
+function score(s){
+ const v=Array.from(statsMap.values());
+ const mf=Math.max(...v.map(x=>+x.frequenza||0),1);
+ const mr=Math.max(...v.map(x=>+x.ritardo||0),1);
+ return .5*((+s.frequenza||0)/mf)+.5*((+s.ritardo||0)/mr);
+}
+function smartGenerate(){
+ const p=Array.from(statsMap.values());
+ if(p.length<90)return Array.from({length:90},(_,i)=>i+1).sort(()=>Math.random()-.5).slice(0,6);
+ const out=[];
+ while(out.length<6){
+  const candidates=p.filter(s=>!out.includes(+s.numero));
+  const weights=candidates.map(score);
+  const total=weights.reduce((a,b)=>a+b,0);
+  let r=Math.random()*total;
+  for(let i=0;i<candidates.length;i++){r-=weights[i];if(r<=0){out.push(+candidates[i].numero);break}}
+ }
+ return out;
+}
 document.getElementById("generate").addEventListener("click",()=>{
  let a=Array.from(selected);
  if(a.length<6){a=smartGenerate()}
  a.sort((x,y)=>x-y);show(a);
 });
 document.getElementById("reset").addEventListener("click",()=>{
- selected.clear();document.querySelectorAll(".num").forEach(b=>b.classList.remove("sel"));update();result.innerHTML='<span style="color:#9ca3af">—</span>';
+ selected.clear();document.querySelectorAll(".num").forEach(b=>b.classList.remove("sel"));update();result.innerHTML='<span style="color:#9ca3af">—</span>';document.getElementById("analysis").textContent="Genera una combinazione per vedere il criterio.";
 });
 
 function statLine(s){return '<div class="statline"><span><strong>'+s.numero+'</strong></span><span>'+s.valore+'</span></div>'}

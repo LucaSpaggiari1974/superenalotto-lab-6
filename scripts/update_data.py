@@ -1,104 +1,125 @@
 import json
+import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
-from io import StringIO
 
 import pandas as pd
 import requests
+from io import StringIO
 
-STATS_URL = "https://www.superenalotto.it/archivio-estrazioni/statistiche"
-ARCHIVE_URL = "https://www.superenalotto.it/archivio-estrazioni"
-
+BASE = "https://www.superenalotto.it/archivio-estrazioni"
 HEADERS = {"User-Agent": "SuperEnalotto-LAB-6 data updater"}
 
-def get_html(url):
-    r = requests.get(url, headers=HEADERS, timeout=30)
-    r.raise_for_status()
-    return r.text
+MONTHS = [
+    "gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
+    "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"
+]
 
-def clean(v):
-    if pd.isna(v):
-        return None
-    if isinstance(v, float) and v.is_integer():
-        return int(v)
-    return v
+def fetch_month(year, month):
+    url = f"{BASE}/{year}/{month}"
+    try:
+        r = requests.get(url, headers=HEADERS, timeout=30)
+        if r.status_code == 404:
+            return []
+        r.raise_for_status()
+        tables = pd.read_html(StringIO(r.text), flavor="lxml")
+        for df in tables:
+            if len(df.columns) < 2:
+                continue
+            cols = [str(c).strip().lower() for c in df.columns]
+            if "combinazione vincente" not in " ".join(cols):
+                continue
+            out = []
+            for _, row in df.iterrows():
+                values = [str(v).strip() for v in row.tolist()]
+                if not values or "Concorso" not in values[0]:
+                    continue
+                m = re.search(r"Concorso\s*(?:Nº|N°|N\.)?\s*(\d+)\s+del\s+(.+)", values[0], re.I)
+                if not m:
+                    continue
+                nums = [int(x) for x in re.findall(r"\b(?:[1-9]|[1-8]\d|90)\b", values[1])]
+                if len(nums) != 6:
+                    continue
+                out.append({
+                    "concorso": int(m.group(1)),
+                    "data": m.group(2),
+                    "numeri": sorted(nums),
+                })
+            if out:
+                return out
+        return []
+    except Exception as e:
+        print(f"WARNING {year}/{month}: {e}")
+        return []
 
-def find_stats_table(html):
-    tables = pd.read_html(StringIO(html))
-    for df in tables:
-        cols = [str(c).strip().upper() for c in df.columns]
-        if "FREQ." in cols and "ATTUALE" in cols and "MAX" in cols:
-            return df
-    raise RuntimeError("Tabella statistiche non trovata")
+def get_all_draws():
+    tasks = []
+    start_year = 1997
+    now = datetime.now()
+    for year in range(start_year, now.year + 1):
+        first_month = 12 if year == 1997 else 1
+        last_month = now.month if year == now.year else 12
+        for month_num in range(first_month, last_month + 1):
+            tasks.append((year, MONTHS[month_num - 1]))
 
-def find_archive_table(html):
-    tables = pd.read_html(StringIO(html))
-    for df in tables:
-        text = " ".join(str(c).lower() for c in df.columns)
-        if "combinazione vincente" in text:
-            return df
-    raise RuntimeError("Tabella archivio estrazioni non trovata")
-
-def parse_stats(html):
-    df = find_stats_table(html)
-    df.columns = [str(c).strip().upper() for c in df.columns]
-    out = []
-    for _, row in df.iterrows():
-        n = clean(row.get("N."))
-        if n is None:
-            continue
-        try:
-            n = int(n)
-        except Exception:
-            continue
-        out.append({
-            "numero": n,
-            "frequenza": clean(row.get("FREQ.")),
-            "ritardo": clean(row.get("ATTUALE")),
-            "ritardo_massimo": clean(row.get("MAX"))
-        })
-    out = [x for x in out if 1 <= x["numero"] <= 90]
-    if len(out) < 90:
-        raise RuntimeError(f"Statistiche incomplete: {len(out)} numeri")
-    return sorted(out, key=lambda x: x["numero"])
-
-def parse_archive(html):
-    df = find_archive_table(html)
-    df.columns = [str(c).strip() for c in df.columns]
     draws = []
-    for _, row in df.iterrows():
-        values = [str(v).strip() for v in row.tolist()]
-        if not values:
-            continue
-        first = values[0]
-        if "Concorso" not in first and "Nº" not in first and "N." not in first:
-            continue
-        nums = []
-        for v in values:
-            if v.isdigit() and 1 <= int(v) <= 90:
-                nums.append(int(v))
-        if len(nums) >= 6:
-            draws.append({
-                "descrizione": first,
-                "numeri": sorted(nums[:6])
-            })
-    return draws[:30]
+    with ThreadPoolExecutor(max_workers=16) as pool:
+        futures = [pool.submit(fetch_month, y, m) for y, m in tasks]
+        for future in as_completed(futures):
+            draws.extend(future.result())
+
+    unique = {}
+    for d in draws:
+        unique[d["concorso"]] = d
+    return [unique[k] for k in sorted(unique)]
+
+def build_stats(draws):
+    if len(draws) < 1000:
+        raise RuntimeError(f"Archivio insufficiente: solo {len(draws)} concorsi recuperati")
+
+    freq = {n: 0 for n in range(1, 91)}
+    current_gap = {n: 0 for n in range(1, 91)}
+    max_gap = {n: 0 for n in range(1, 91)}
+
+    for draw in draws:
+        nums = set(draw["numeri"])
+        for n in range(1, 91):
+            if n in nums:
+                freq[n] += 1
+                max_gap[n] = max(max_gap[n], current_gap[n])
+                current_gap[n] = 0
+            else:
+                current_gap[n] += 1
+
+    for n in range(1, 91):
+        max_gap[n] = max(max_gap[n], current_gap[n])
+
+    return [
+        {
+            "numero": n,
+            "frequenza": freq[n],
+            "ritardo": current_gap[n],
+            "ritardo_massimo": max_gap[n],
+        }
+        for n in range(1, 91)
+    ]
 
 def main():
-    stats_html = get_html(STATS_URL)
-    archive_html = get_html(ARCHIVE_URL)
-
-    stats = parse_stats(stats_html)
-    draws = parse_archive(archive_html)
+    draws = get_all_draws()
+    stats = build_stats(draws)
 
     data = {
         "updated_at": datetime.now(timezone.utc).isoformat(),
         "source": "SuperEnalotto.it",
+        "concorsi_totali": len(draws),
         "stats": stats,
-        "ultime_estrazioni": draws
+        "ultime_estrazioni": list(reversed(draws[-30:])),
     }
 
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
+
+    print(f"OK: {len(draws)} concorsi, data.json aggiornato")
 
 if __name__ == "__main__":
     main()

@@ -1,44 +1,112 @@
 import json
 import re
 from datetime import datetime, timezone
-import requests
 
-URL = "https://www.superenalotto.it/archivio-estrazioni/statistiche"
-HEADERS = {"User-Agent": "Mozilla/5.0 SuperEnalotto-LAB-6/2.0", "Accept": "text/html"}
+from playwright.sync_api import sync_playwright
 
-def fetch():
-    r = requests.get(URL, headers=HEADERS, timeout=60)
-    r.raise_for_status()
-    return r.text
+STATS_URL = "https://www.superenalotto.it/archivio-estrazioni/statistiche"
+ARCHIVE_URL = "https://www.superenalotto.it/archivio-estrazioni"
 
-def parse_stats(html):
-    text = re.sub(r"<[^>]+>", " ", html)
-    text = re.sub(r"\\s+", " ", text)
+
+def clean(value):
+    return re.sub(r"\s+", " ", value or "").strip()
+
+
+def numbers_from(text):
+    return [int(x) for x in re.findall(r"(?<!\d)(?:[1-9]|[1-8]\d|90)(?!\d)", text)]
+
+
+def scrape_stats(page):
+    page.goto(STATS_URL, wait_until="domcontentloaded", timeout=120000)
+    page.wait_for_timeout(3500)
+
     rows = []
-    # The official statistics table lists: number, frequency, current delay, max delay.
-    pattern = re.compile(r"(?<!\\d)([1-9]|[1-8]\\d|90)\\s+(\\d{2,3})\\s+(\\d{1,3})\\s+(\\d{1,3})(?!\\d)")
-    seen = set()
-    for m in pattern.finditer(text):
-        n, freq, delay, max_delay = map(int, m.groups())
-        if n not in seen and 200 <= freq <= 400 and 0 <= delay <= 500 and 0 <= max_delay <= 500:
-            seen.add(n)
-            rows.append({"numero": n, "frequenza": freq, "ritardo": delay, "ritardo_massimo": max_delay})
-    if len(rows) != 90:
-        raise RuntimeError(f"Statistiche ufficiali incomplete: trovati {len(rows)} numeri")
-    rows.sort(key=lambda x: x["numero"])
-    return rows
+    for row in page.locator("table tr").all():
+        cells = [clean(x) for x in row.locator("th,td").all_inner_texts()]
+        if len(cells) < 4:
+            continue
+        m = re.fullmatch(r"(\d{1,2})", cells[0])
+        if not m:
+            continue
+        n = int(m.group(1))
+        if not 1 <= n <= 90:
+            continue
+        nums = []
+        for cell in cells[1:]:
+            mm = re.fullmatch(r"(\d{1,3})", cell)
+            if mm:
+                nums.append(int(mm.group(1)))
+        if len(nums) >= 3 and 200 <= nums[0] <= 400 and nums[1] <= 500 and nums[2] <= 500:
+            rows.append({
+                "numero": n,
+                "frequenza": nums[0],
+                "ritardo": nums[1],
+                "ritardo_massimo": nums[2],
+            })
+
+    unique = {r["numero"]: r for r in rows}
+    if len(unique) != 90:
+        raise RuntimeError(f"Statistiche ufficiali incomplete: trovati {len(unique)} numeri")
+    return [unique[n] for n in range(1, 91)]
+
+
+def scrape_draws(page):
+    page.goto(ARCHIVE_URL, wait_until="domcontentloaded", timeout=120000)
+    page.wait_for_timeout(3000)
+
+    draws = []
+    for row in page.locator("table tr").all():
+        cells = [clean(x) for x in row.locator("th,td").all_inner_texts()]
+        if len(cells) < 2:
+            continue
+
+        m = re.search(r"Concorso\s*[Nnº°]*\s*(\d+)\s+del\s+(.+?\d{4})$", cells[0])
+        if not m:
+            continue
+
+        nums = numbers_from(cells[1])
+        if len(nums) != 6 or len(set(nums)) != 6:
+            continue
+
+        draws.append({
+            "numero_concorso": int(m.group(1)),
+            "descrizione": cells[0],
+            "numeri": sorted(nums),
+        })
+
+    unique = {d["numero_concorso"]: d for d in draws}
+    if not unique:
+        raise RuntimeError("Nessuna estrazione trovata nell'archivio ufficiale")
+    return sorted(unique.values(), key=lambda d: d["numero_concorso"], reverse=True)[:30]
+
 
 def main():
-    stats_html = fetch()
-    stats = parse_stats(stats_html)
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1440, "height": 1200})
+        stats = scrape_stats(page)
+        draws = scrape_draws(page)
+        browser.close()
+
     data = {
         "updated_at": datetime.now(timezone.utc).isoformat(),
-        "source": "https://www.superenalotto.it/archivio-estrazioni/statistiche",
-        "stats": stats
+        "source": STATS_URL,
+        "source_archivio": ARCHIVE_URL,
+        "stats": stats,
+        "ultime_estrazioni": [
+            {
+                "descrizione": d["descrizione"],
+                "numeri": d["numeri"],
+            }
+            for d in draws
+        ],
     }
+
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-    print(f"OK: aggiornate statistiche per {len(stats)} numeri")
+
+    print(f"OK: {len(stats)} statistiche e {len(draws)} estrazioni aggiornate")
+
 
 if __name__ == "__main__":
     main()

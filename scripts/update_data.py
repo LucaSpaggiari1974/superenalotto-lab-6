@@ -2,7 +2,7 @@ import json
 import re
 from datetime import datetime, timezone
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 STATS_URL = "https://www.superenalotto.it/archivio-estrazioni/statistiche"
 ARCHIVE_URL = "https://www.superenalotto.it/archivio-estrazioni"
@@ -16,9 +16,19 @@ def numbers_from(text):
     return [int(x) for x in re.findall(r"(?<!\d)(?:[1-9]|[1-8]\d|90)(?!\d)", text)]
 
 
+def open_page(page, url, wait_ms=5000):
+    # Il sito ufficiale può tenere la connessione aperta a lungo.
+    # "commit" evita di far fallire il job mentre la pagina continua a caricarsi.
+    page.goto(url, wait_until="commit", timeout=30000)
+    try:
+        page.wait_for_load_state("domcontentloaded", timeout=30000)
+    except PlaywrightTimeoutError:
+        pass
+    page.wait_for_timeout(wait_ms)
+
+
 def scrape_stats(page):
-    page.goto(STATS_URL, wait_until="domcontentloaded", timeout=120000)
-    page.wait_for_timeout(3500)
+    open_page(page, STATS_URL, wait_ms=6000)
 
     rows = []
     for row in page.locator("table tr").all():
@@ -51,8 +61,7 @@ def scrape_stats(page):
 
 
 def scrape_draws(page):
-    page.goto(ARCHIVE_URL, wait_until="domcontentloaded", timeout=120000)
-    page.wait_for_timeout(3000)
+    open_page(page, ARCHIVE_URL, wait_ms=5000)
 
     draws = []
     for row in page.locator("table tr").all():
@@ -83,10 +92,17 @@ def scrape_draws(page):
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        page = browser.new_page(viewport={"width": 1440, "height": 1200})
-        stats = scrape_stats(page)
-        draws = scrape_draws(page)
-        browser.close()
+        page = browser.new_page(
+            viewport={"width": 1440, "height": 1200},
+            user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                       "(KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+            locale="it-IT",
+        )
+        try:
+            stats = scrape_stats(page)
+            draws = scrape_draws(page)
+        finally:
+            browser.close()
 
     data = {
         "updated_at": datetime.now(timezone.utc).isoformat(),

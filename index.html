@@ -27,7 +27,7 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 
 <main>
 <section class="card">
-<h1>SuperEnalotto LAB 6 <span style="font-size:11px;color:#6b7280;font-weight:700;vertical-align:middle">v14</span></h1>
+<h1>SuperEnalotto LAB 6 <span style="font-size:11px;color:#6b7280;font-weight:700;vertical-align:middle">v15</span></h1>
 <p class="sub">🧠 Motore unico: statistica + Monte Carlo + backtest + ottimizzazione del portafoglio.</p>
 <div class="controls">
 <select id="profile" class="btn secondary"><option value="integrata">LAB 6 — Motore unico</option></select>
@@ -55,9 +55,9 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 <h2 style="margin:0 0 12px">Ultimi concorsi</h2>
 <div id="history"><span class="hint">Caricamento…</span></div>
 </section>
-<footer>SuperEnalotto LAB 6 · v14</footer>
+<footer>SuperEnalotto LAB 6 · v15</footer>
 </main>
-<script src="./lab-engine.js?v=14"></script>
+<script src="./lab-engine.js?v=15"></script>
 <script>
 
 let currentData=null;
@@ -87,7 +87,7 @@ function runLab(){
  const n=+document.getElementById("howMany").value,engine=window.LAB6Math.build(window.__LABDATA),rows=engine.generate("integrata",n);
  renderLabResults(rows);
  const p=engine.profiles.find(x=>x[0]==="integrata");
- document.getElementById("labExplain").innerHTML='<strong>'+p[1]+':</strong> '+p[2]+'<br>Il motore integra storico, ritardi, finestre recenti, co-occorrenze, struttura delle sestine, Monte Carlo e diversificazione.';
+ document.getElementById("labExplain").innerHTML='<strong>'+p[1]+':</strong> '+p[2]+'<br>Il motore usa finestre 10/30/100/180, frequenza smussata, ritardi, co-occorrenze normalizzate, struttura empirica delle sestine, simulazione stocastica, backtest e diversificazione.';
 }
 document.getElementById("generateLab").addEventListener("click",runLab);
 document.getElementById("refreshLab").addEventListener("click",runLab);
@@ -95,7 +95,7 @@ document.getElementById("howMany").addEventListener("change",runLab);
 document.getElementById("backtestLab").addEventListener("click",()=>{
  if(!window.__LABDATA||!window.LAB6Math)return;
  const r=window.LAB6Math.build(window.__LABDATA).backtest("integrata");
- document.getElementById("labResults").innerHTML='<div class="latest"><strong>Backtest walk-forward · '+r.draws+' concorsi</strong>'+statLine("Media numeri centrati",r.avg.toFixed(3))+statLine("Giocate con ≥2",(r.hit2*100).toFixed(1)+"%")+statLine("Giocate con ≥3",(r.hit3*100).toFixed(1)+"%")+statLine("Giocate con ≥4",(r.hit4*100).toFixed(1)+"%")+statLine("Giocate con ≥5",(r.hit5*100).toFixed(2)+"%")+statLine("Massimo storico nel test",r.max)+'</div>';
+ document.getElementById("labResults").innerHTML='<div class="latest"><strong>Backtest walk-forward · '+r.draws+' concorsi</strong>'+statLine("Media numeri centrati",r.avg.toFixed(3))+statLine("Giocate con ≥2",(r.hit2*100).toFixed(1)+"%")+statLine("Giocate con ≥3",(r.hit3*100).toFixed(1)+"%")+statLine("Giocate con ≥4",(r.hit4*100).toFixed(1)+"%")+statLine("Giocate con ≥5",(r.hit5*100).toFixed(2)+"%")+statLine("Media baseline casuale",r.baselineAvg.toFixed(3))+statLine("Indice vs baseline",r.lift.toFixed(2)+"×")+statLine("Massimo storico nel test",r.max)+'</div>';
  document.getElementById("labExplain").textContent="Backtest walk-forward: ogni test usa soltanto dati disponibili prima del concorso considerato.";
 });
 loadData();

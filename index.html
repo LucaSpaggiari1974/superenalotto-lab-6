@@ -27,7 +27,7 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 
 <main>
 <section class="card">
-<h1>SuperEnalotto LAB 6 <span style="font-size:11px;color:#6b7280;font-weight:700;vertical-align:middle">v15</span></h1>
+<h1>SuperEnalotto LAB 6 <span style="font-size:11px;color:#6b7280;font-weight:700;vertical-align:middle">v16</span></h1>
 <p class="sub">🧠 Motore unico: statistica + Monte Carlo + backtest + ottimizzazione del portafoglio.</p>
 <div class="hint" style="margin-bottom:10px">Ogni combinazione costa €1 secondo le regole ufficiali; il modo diretto per aumentare la copertura è giocare più combinazioni distinte.</div>
 <div class="controls">
@@ -58,9 +58,9 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 <h2 style="margin:0 0 12px">Ultimi concorsi</h2>
 <div id="history"><span class="hint">Caricamento…</span></div>
 </section>
-<footer>SuperEnalotto LAB 6 · v15</footer>
+<footer>SuperEnalotto LAB 6 · v16</footer>
 </main>
-<script src="./lab-engine.js?v=15"></script>
+<script src="./lab-engine.js?v=16"></script>
 <script>
 
 let currentData=null;
@@ -97,7 +97,7 @@ document.getElementById("generateBudget").addEventListener("click",()=>{
  if(!window.LAB6Math||!window.__LABDATA)return;
  const budget=+document.getElementById("budget").value,engine=window.LAB6Math.build(window.__LABDATA),r=engine.generateBudget(budget);
  renderLabResults(r.rows);
- document.getElementById("labExplain").innerHTML="<strong>Massima copertura · €"+budget+":</strong> "+r.count+" combinazioni distinte da 1€ ciascuna, costruite con diversificazione e sovrapposizione contenuta. Il budget aumenta il numero di combinazioni, non la probabilità intrinseca di una singola sestina."; 
+ document.getElementById("labExplain").innerHTML="<strong>Massima copertura · €"+budget+":</strong> "+r.count+" combinazioni distinte da 1€ ciascuna, costruite con diversificazione e sovrapposizione contenuta. Se hai scelto €"+budget+" il sistema genera esattamente "+budget+" giocate. Il budget aumenta il numero di combinazioni, non la probabilità intrinseca di una singola sestina."; 
 });
 document.getElementById("refreshLab").addEventListener("click",runLab);
 document.getElementById("howMany").addEventListener("change",runLab);

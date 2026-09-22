@@ -98,6 +98,22 @@ function simulate(data,mode,runs=20000){
  for(let i=0;i<runs;i++)weightedPick(scored,6).forEach(n=>counts.set(n,counts.get(n)+1));
  return scored.map(x=>({...x,simulazioni:counts.get(x.numero),simFreq:counts.get(x.numero)/runs})).sort((a,b)=>b.simFreq-a.simFreq);
 }
+function backtest(data,mode){
+ const draws=(data.ultime_estrazioni||[]).slice().reverse();
+ if(draws.length<8)return {draws:0,avg:0,hit2:0,hit3:0,hit4:0,hit5:0,max:0};
+ let total=0,hit2=0,hit3=0,hit4=0,hit5=0,max=0;
+ for(let i=5;i<draws.length;i++){
+   const hist={...data,ultime_estrazioni:draws.slice(0,i)};
+   const rows=generate(hist,mode,5);
+   const actual=new Set(draws[i].numeri);
+   for(const row of rows){
+     const h=row.numeri.filter(n=>actual.has(n)).length; total+=h;
+     if(h>=2)hit2++;if(h>=3)hit3++;if(h>=4)hit4++;if(h>=5)hit5++;if(h>max)max=h;
+   }
+ }
+ const tests=(draws.length-5)*5;
+ return {draws:draws.length-5,avg:total/tests,hit2:hit2/tests,hit3:hit3/tests,hit4:hit4/tests,hit5:hit5/tests,max};
+}
 function build(data){
  const profiles=[
   ["ritardi","Ritardi","Massimo peso a ritardo e rapporto col massimo storico."],
@@ -108,7 +124,7 @@ function build(data){
   ["fortuna","Fortuna","Indice composito sperimentale; non è una probabilità reale."],
   ["integrata","LAB Integrata","Combina tutti gli indicatori con filtri di equilibrio."]
  ];
- return {profiles,generate:(mode,n)=>generate(data,mode,n),simulate:(mode,n)=>simulate(data,mode,n)};
+ return {profiles,generate:(mode,n)=>generate(data,mode,n),simulate:(mode,n)=>simulate(data,mode,n),backtest:(mode)=>backtest(data,mode)};
 }
 window.LAB6Math={build,comboStats,choose,comboProb};
 })();

@@ -152,10 +152,6 @@ document.getElementById("generate").addEventListener("click",()=>{
  if(a.length<6){a=smartGenerate()}
  a.sort((x,y)=>x-y);show(a);
 });
-document.getElementById("reset").addEventListener("click",()=>{
- selected.clear();document.querySelectorAll(".num").forEach(b=>b.classList.remove("sel"));update();result.innerHTML='<span style="color:#9ca3af">—</span>';document.getElementById("analysis").textContent="Genera una combinazione per vedere il criterio.";
-});
-
 function statLine(s){return '<div class="statline"><span><strong>'+s.numero+'</strong></span><span>'+s.valore+'</span></div>'}
 function renderData(data){
  const stats=data.stats||[];

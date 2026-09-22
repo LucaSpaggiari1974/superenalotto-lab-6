@@ -1,4 +1,4 @@
-const CACHE="lab6-v20";
+const CACHE="lab6-v21";
 const ASSETS=["./","./index.html","./lab-engine.js?v=17","./manifest.webmanifest","./data.json"];
 async function notify(type,percent,text){const clientsList=await self.clients.matchAll({includeUncontrolled:true,type:"window"});clientsList.forEach(c=>c.postMessage({type,percent,text}))}
 self.addEventListener("install",event=>event.waitUntil((async()=>{const cache=await caches.open(CACHE);for(const asset of ASSETS){try{await cache.add(asset)}catch(e){console.warn("Cache asset",asset,e)}}await self.skipWaiting()})()));

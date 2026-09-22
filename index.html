@@ -39,6 +39,21 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 <p class="hint">I dati vengono richiesti nuovamente ogni volta che apri l'app. Le statistiche descrivono le estrazioni passate e non prevedono i risultati futuri.</p>
 </section>
 
+<section class="card" id="labEngine">
+<h2>🧠 Motore matematico LAB 6</h2>
+<p class="hint" style="margin-top:0">Genera più giocate con modelli diversi. Il punteggio ordina le combinazioni secondo gli indicatori storici; non cambia la probabilità matematica reale di una sestina.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<select id="profile" class="btn secondary" style="width:100%;appearance:auto">
+<option value="integrata">LAB Integrata</option><option value="ritardi">Ritardi</option><option value="caldi">Numeri caldi</option><option value="freddi">Numeri freddi</option><option value="statistica">Statistica</option><option value="montecarlo">Monte Carlo</option><option value="fortuna">Fortuna</option>
+</select>
+<select id="howMany" class="btn secondary" style="width:100%;appearance:auto"><option>5</option><option selected>10</option><option>15</option><option>20</option></select>
+</div>
+<button class="btn primary" id="generateLab" style="width:100%;margin-top:10px">Genera giocate consigliate</button>
+<div id="labResults" style="margin-top:14px"></div>
+<div class="actions" style="margin-top:10px"><button class="btn secondary" id="simulateLab">Analisi Monte Carlo 20.000</button><button class="btn secondary" id="refreshLab">Ricalcola</button></div>
+<div id="labExplain" class="hint"></div>
+</section>
+
 <section class="card">
 <h2>Ultima estrazione</h2>
 <div id="latest"><span style="color:#9ca3af">Caricamento…</span></div>
@@ -65,6 +80,7 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 
 <footer>SuperEnalotto LAB 6</footer>
 </main>
+<script src="./lab-engine.js"></script>
 <script>
 const grid=document.getElementById("grid"),count=document.getElementById("count"),result=document.getElementById("result");
 let selected=new Set();
@@ -149,6 +165,31 @@ async function loadData(){
  }
 }
 loadData();
+
+<script>
+function renderLabResults(rows){
+ const box=document.getElementById("labResults");
+ box.innerHTML=rows.map((r,i)=>'<div class="latest" style="margin-bottom:8px"><strong>Giocata '+(i+1)+' · indice '+(r.punteggio*100).toFixed(1)+'/100</strong><div class="balls" style="justify-content:flex-start;margin-top:8px">'+r.numeri.map(n=>'<span class="ball">'+n+'</span>').join('')+'</div></div>').join('')||'<div class="hint">Nessuna combinazione.</div>';
+}
+function runLab(){
+ if(!window.LAB6Math||!window.__LABDATA)return;
+ const mode=document.getElementById("profile").value,n=+document.getElementById("howMany").value;
+ const rows=window.LAB6Math.build(window.__LABDATA).generate(mode,n);
+ renderLabResults(rows);
+ const p=window.LAB6Math.build(window.__LABDATA).profiles.find(x=>x[0]===mode);
+ document.getElementById("labExplain").innerHTML='<strong>'+p[1]+':</strong> '+p[2]+'<br>Le giocate sono diversificate e ordinate da un indice statistico sperimentale.';
+}
+document.getElementById("generateLab").addEventListener("click",runLab);
+document.getElementById("refreshLab").addEventListener("click",runLab);
+document.getElementById("simulateLab").addEventListener("click",()=>{
+ if(!window.__LABDATA)return;
+ const a=window.LAB6Math.build(window.__LABDATA).simulate(document.getElementById("profile").value,20000).slice(0,10);
+ document.getElementById("labResults").innerHTML='<div class="latest"><strong>Top 10 simulazione</strong><div style="margin-top:8px">'+a.map(x=>'<div class="statline"><span><strong>'+x.numero+'</strong></span><span>'+x.simulazioni+' / 20.000 · '+(x.simFreq*100).toFixed(2)+'%</span></div>').join('')+'</div></div>';
+ document.getElementById("labExplain").textContent="Monte Carlo: frequenze del campionamento ponderato dal modello selezionato. Non sono probabilità predittive dell'estrazione reale.";
+});
+const _renderData=renderData;
+renderData=function(data){window.__LABDATA=data;_renderData(data)};
+</script>
 if("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));
 </script>
 </body>

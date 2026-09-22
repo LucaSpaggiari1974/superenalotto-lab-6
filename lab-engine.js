@@ -1,4 +1,4 @@
-/* SuperEnalotto LAB 6 — motore integrato v16
+/* SuperEnalotto LAB 6 — motore integrato v17
    Selezione statistica multi-finestra + co-occorrenze normalizzate +
    simulazione stocastica + backtest walk-forward + diversificazione.
    Nessun modello modifica la probabilità matematica reale di una sestina
@@ -124,7 +124,7 @@ function generate(data,count=10){
    for(let i=0;i<candidates.length;i++){const c=candidates[i],s=c.punteggio*portfolioPenalty(c,out);if(s>bs){bs=s;bi=i}}
    if(bi<0)break;
    const c=candidates.splice(bi,1)[0],maxOverlap=out.reduce((m,x)=>Math.max(m,c.numeri.filter(n=>x.numeri.includes(n)).length),0);
-   if(maxOverlap<=3||out.length<2)out.push({...c,portafoglioScore:bs,profilo:"LAB 6 Integrata v16"});
+   if(maxOverlap<=3||out.length<2)out.push({...c,portafoglioScore:bs,profilo:"LAB 6 Integrata v17"});
  }
  return out;
 }
@@ -148,20 +148,14 @@ function backtest(data){
  return {draws:draws.length-15,avg,hit2:tests?hit2/tests:0,hit3:tests?hit3/tests:0,hit4:tests?hit4/tests:0,hit5:tests?hit5/tests:0,max,baselineAvg,lift:baselineAvg?avg/baselineAvg:0};
 }
 function generateBudget(data,budget){
- const b=Math.max(1,Math.min(100,Math.floor(Number(budget)||1))),count=b;
- let rows=generate(data,count);
- // La modalità budget deve rispettare esattamente il numero di combinazioni acquistabili.
- // Se il filtro di diversificazione non riesce a completare il portafoglio, riempiamo
- // con nuove sestine uniche, mantenendo comunque la qualità del motore LAB 6.
- if(rows.length<count){
-   const model=integratedScores(data),seen=new Set(rows.map(r=>r.numeri.join("-")));
-   let guard=0;
-   while(rows.length<count&&guard++<200000){
-     const nums=weightedPick(model.scored,6),key=nums.join("-");
-     if(seen.has(key))continue;
-     seen.add(key);
-     rows.push({numeri:nums,punteggio:comboScore(nums,model),profilo:"LAB 6 Budget v16",portafoglioScore:0});
-   }
+ const b=Math.max(1,Math.min(100,Math.floor(Number(budget)||1)));
+ const model=integratedScores(data),rows=[],seen=new Set();
+ let guard=0;
+ while(rows.length<b&&guard++<500000){
+   const nums=weightedPick(model.scored,6),key=nums.join("-");
+   if(seen.has(key))continue;
+   seen.add(key);
+   rows.push({numeri:nums,punteggio:comboScore(nums,model),profilo:"LAB 6 Budget v17",portafoglioScore:0});
  }
  return {budget:b,count:rows.length,rows};
 }

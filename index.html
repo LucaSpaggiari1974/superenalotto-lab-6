@@ -102,6 +102,7 @@ document.getElementById("backtestLab").addEventListener("click",()=>{
 });
 loadData();
 if("serviceWorker" in navigator){window.addEventListener("load",async()=>{try{
+ navigator.serviceWorker.addEventListener("controllerchange",()=>{showUpdateProgress(100,"Nuova versione LAB 6. Riavvio…");setTimeout(()=>location.reload(),700)});
  const registration=await navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"});
  if(registration.waiting){showUpdateProgress(92,"Applicazione aggiornamento…");registration.waiting.postMessage({type:"SKIP_WAITING"})}
  registration.addEventListener("updatefound",()=>{const worker=registration.installing;if(!worker)return;showUpdateProgress(15,"Download aggiornamento…");worker.addEventListener("statechange",()=>{if(worker.state==="installed"&&navigator.serviceWorker.controller){showUpdateProgress(92,"Applicazione aggiornamento…");worker.postMessage({type:"SKIP_WAITING"})}})});

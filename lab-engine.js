@@ -1,4 +1,4 @@
-/* SuperEnalotto LAB 6 — motore integrato v15
+/* SuperEnalotto LAB 6 — motore integrato v16
    Selezione statistica multi-finestra + co-occorrenze normalizzate +
    simulazione stocastica + backtest walk-forward + diversificazione.
    Nessun modello modifica la probabilità matematica reale di una sestina
@@ -124,7 +124,7 @@ function generate(data,count=10){
    for(let i=0;i<candidates.length;i++){const c=candidates[i],s=c.punteggio*portfolioPenalty(c,out);if(s>bs){bs=s;bi=i}}
    if(bi<0)break;
    const c=candidates.splice(bi,1)[0],maxOverlap=out.reduce((m,x)=>Math.max(m,c.numeri.filter(n=>x.numeri.includes(n)).length),0);
-   if(maxOverlap<=3||out.length<2)out.push({...c,portafoglioScore:bs,profilo:"LAB 6 Integrata v15"});
+   if(maxOverlap<=3||out.length<2)out.push({...c,portafoglioScore:bs,profilo:"LAB 6 Integrata v16"});
  }
  return out;
 }
@@ -149,7 +149,20 @@ function backtest(data){
 }
 function generateBudget(data,budget){
  const b=Math.max(1,Math.min(100,Math.floor(Number(budget)||1))),count=b;
- const rows=generate(data,count);
+ let rows=generate(data,count);
+ // La modalità budget deve rispettare esattamente il numero di combinazioni acquistabili.
+ // Se il filtro di diversificazione non riesce a completare il portafoglio, riempiamo
+ // con nuove sestine uniche, mantenendo comunque la qualità del motore LAB 6.
+ if(rows.length<count){
+   const model=integratedScores(data),seen=new Set(rows.map(r=>r.numeri.join("-")));
+   let guard=0;
+   while(rows.length<count&&guard++<200000){
+     const nums=weightedPick(model.scored,6),key=nums.join("-");
+     if(seen.has(key))continue;
+     seen.add(key);
+     rows.push({numeri:nums,punteggio:comboScore(nums,model),profilo:"LAB 6 Budget v16",portafoglioScore:0});
+   }
+ }
  return {budget:b,count:rows.length,rows};
 }
 function build(data){return{

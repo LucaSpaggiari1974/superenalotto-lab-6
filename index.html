@@ -24,7 +24,7 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 </style>
 </head>
 <body>
-<div id="updateOverlay" aria-live="polite" aria-busy="true"><div class="updateBox"><div class="updateTitle">Aggiornamento in corso</div><div class="updateText" id="updateText">Prego attendere…</div><div class="updateTrack"><div class="updateBar" id="updateBar"></div></div><div class="updatePct" id="updatePct">0%</div></div></div>
+
 <main>
 <section class="card">
 <h1>SuperEnalotto LAB 6 <span style="font-size:11px;color:#6b7280;font-weight:700;vertical-align:middle">v14</span></h1>
@@ -59,9 +59,7 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 </main>
 <script src="./lab-engine.js?v=14"></script>
 <script>
-const updateOverlay=document.getElementById("updateOverlay"),updateBar=document.getElementById("updateBar"),updatePct=document.getElementById("updatePct"),updateText=document.getElementById("updateText");
-function showUpdateProgress(p,t){updateOverlay.classList.add("show");const n=Math.max(0,Math.min(100,Math.round(p)));updateBar.style.width=n+"%";updatePct.textContent=n+"%";updateText.textContent=t||"Prego attendere…"}
-function hideUpdateProgress(){updateBar.style.width="100%";updatePct.textContent="100%";updateText.textContent="Aggiornamento completato";setTimeout(()=>updateOverlay.classList.remove("show"),450)}
+
 let currentData=null;
 function statLine(n,v){return '<div class="statline"><span><strong>'+n+'</strong></span><span>'+v+'</span></div>'}
 function renderData(data){
@@ -76,9 +74,9 @@ function renderData(data){
  const st=document.getElementById("status"),when=new Date(data.updated_at);st.textContent="Dati aggiornati: "+when.toLocaleString("it-IT");st.className="status ok";
 }
 async function loadData(){
- showUpdateProgress(10,"Controllo aggiornamenti…");
- try{showUpdateProgress(35,"Scaricamento dati…");const r=await fetch("./data.json?refresh="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("HTTP "+r.status);showUpdateProgress(75,"Elaborazione dati…");renderData(await r.json());updateOverlay.classList.remove("show");runLab();}
- catch(e){document.getElementById("status").textContent="Dati locali non disponibili: impossibile aggiornare.";document.getElementById("status").className="status err";hideUpdateProgress();}
+
+ try{const r=await fetch("./data.json?refresh="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("HTTP "+r.status);renderData(await r.json());runLab();}
+ catch(e){document.getElementById("status").textContent="Dati locali non disponibili: impossibile aggiornare.";document.getElementById("status").className="status err";}
 }
 function renderLabResults(rows){
  const box=document.getElementById("labResults");
@@ -102,11 +100,11 @@ document.getElementById("backtestLab").addEventListener("click",()=>{
 });
 loadData();
 if("serviceWorker" in navigator){window.addEventListener("load",async()=>{try{
- navigator.serviceWorker.addEventListener("controllerchange",()=>{showUpdateProgress(100,"Nuova versione LAB 6. Riavvio…");setTimeout(()=>location.reload(),700)});
+ navigator.serviceWorker.addEventListener("controllerchange",()=>{setTimeout(()=>location.reload(),100)});
  const registration=await navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"});
- if(registration.waiting){showUpdateProgress(92,"Applicazione aggiornamento…");registration.waiting.postMessage({type:"SKIP_WAITING"})}
- registration.addEventListener("updatefound",()=>{const worker=registration.installing;if(!worker)return;showUpdateProgress(15,"Download aggiornamento…");worker.addEventListener("statechange",()=>{if(worker.state==="installed"&&navigator.serviceWorker.controller){showUpdateProgress(92,"Applicazione aggiornamento…");worker.postMessage({type:"SKIP_WAITING"})}})});
- navigator.serviceWorker.addEventListener("message",e=>{const d=e.data||{};if(d.type==="UPDATE_PROGRESS")showUpdateProgress(d.percent,d.text);if(d.type==="UPDATE_READY")showUpdateProgress(96,d.text||"Applicazione aggiornamento…")});
+ if(registration.waiting){registration.waiting.postMessage({type:"SKIP_WAITING"})}
+ registration.addEventListener("updatefound",()=>{const worker=registration.installing;if(!worker)return;worker.addEventListener("statechange",()=>{if(worker.state==="installed"&&navigator.serviceWorker.controller){worker.postMessage({type:"SKIP_WAITING"})}})});
+ 
 
 }catch(e){console.warn("Service Worker non disponibile",e)}})}
 </script>

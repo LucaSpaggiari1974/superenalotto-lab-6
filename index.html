@@ -17,9 +17,25 @@ h1{font-size:28px;margin:0 0 8px}.sub{color:#6b7280;margin:0 0 20px}.grid{displa
 h2{font-size:20px;margin:0 0 12px}.latest{background:#f9fafb;border-radius:16px;padding:14px;margin-bottom:10px}.latest strong{display:block;margin-bottom:8px}.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.statbox{background:#f9fafb;border-radius:16px;padding:14px}.statbox h3{font-size:14px;margin:0 0 10px}.statline{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e5e7eb;font-size:13px}.statline:last-child{border-bottom:0}.allstats{margin-top:12px;width:100%;border-collapse:collapse;font-size:12px}.allstats th,.allstats td{padding:7px 4px;border-bottom:1px solid #e5e7eb;text-align:right}.allstats th:first-child,.allstats td:first-child{text-align:left}
 footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 @media(max-width:360px){.grid{gap:6px}.num{font-size:14px}.statgrid{grid-template-columns:1fr}}
+
+#updateOverlay{position:fixed;inset:0;background:rgba(17,24,39,.38);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px;backdrop-filter:blur(3px)}
+#updateOverlay.show{display:flex}
+.updateBox{width:min(330px,92vw);background:#fff;border-radius:20px;padding:20px;box-shadow:0 18px 50px rgba(0,0,0,.22);text-align:center}
+.updateTitle{font-weight:800;font-size:17px;margin-bottom:6px}.updateText{font-size:13px;color:#6b7280;margin-bottom:14px}
+.updateTrack{height:9px;background:#e5e7eb;border-radius:999px;overflow:hidden}.updateBar{height:100%;width:0%;background:#111827;border-radius:999px;transition:width .25s ease}
+.updatePct{font-size:12px;color:#6b7280;margin-top:8px;font-weight:700}
+
 </style>
 </head>
 <body>
+<div id="updateOverlay" aria-live="polite" aria-busy="true">
+  <div class="updateBox">
+    <div class="updateTitle">Aggiornamento in corso</div>
+    <div class="updateText" id="updateText">Prego attendere…</div>
+    <div class="updateTrack"><div class="updateBar" id="updateBar"></div></div>
+    <div class="updatePct" id="updatePct">0%</div>
+  </div>
+</div>
 <main>
 <section class="card">
 <h1>SuperEnalotto LAB 6</h1>
@@ -82,6 +98,19 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 </main>
 <script src="./lab-engine.js"></script>
 <script>
+
+const updateOverlay=document.getElementById("updateOverlay"),updateBar=document.getElementById("updateBar"),updatePct=document.getElementById("updatePct"),updateText=document.getElementById("updateText");
+let updateActive=false;
+function showUpdateProgress(p,text){
+  updateActive=true; updateOverlay.classList.add("show");
+  const n=Math.max(0,Math.min(100,Math.round(p)));
+  updateBar.style.width=n+"%"; updatePct.textContent=n+"%";
+  updateText.textContent=text||"Prego attendere…";
+}
+function hideUpdateProgress(){
+  updateBar.style.width="100%"; updatePct.textContent="100%"; updateText.textContent="Aggiornamento completato";
+  setTimeout(()=>{updateOverlay.classList.remove("show");updateActive=false},450);
+}
 const grid=document.getElementById("grid"),count=document.getElementById("count"),result=document.getElementById("result");
 let selected=new Set();
 let statsMap=new Map();
@@ -154,17 +183,55 @@ const FALLBACK_DATA = {"updated_at":"2026-09-20T21:00:00+02:00","source":"SuperE
 
 async function loadData(){
  const status=document.getElementById("status");
+ showUpdateProgress(8,"Controllo aggiornamenti e dati…");
  try{
+   showUpdateProgress(35,"Scaricamento dati aggiornati…");
    const r=await fetch("./data.json?refresh="+Date.now(),{cache:"no-store"});
    if(!r.ok) throw new Error("HTTP "+r.status);
+   showUpdateProgress(78,"Elaborazione dati…");
    renderData(await r.json());
+   showUpdateProgress(100,"Aggiornamento completato");
  }catch(e){
    renderData(FALLBACK_DATA);
    status.textContent="Dati locali disponibili · aggiornamento online non riuscito";
    status.className="status ok";
+   hideUpdateProgress();
  }
 }
 loadData();
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",async()=>{
+    try{
+      const registration=await navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"});
+      if(registration.waiting) showUpdateProgress(92,"Applicazione dell'aggiornamento…");
+      registration.addEventListener("updatefound",()=>{
+        const worker=registration.installing;
+        if(!worker)return;
+        showUpdateProgress(15,"Download dell'aggiornamento…");
+        worker.addEventListener("statechange",()=>{
+          if(worker.state==="installed"){
+            if(navigator.serviceWorker.controller){
+              showUpdateProgress(92,"Applicazione dell'aggiornamento…");
+              worker.postMessage({type:"SKIP_WAITING"});
+            }else{
+              hideUpdateProgress();
+            }
+          }
+        });
+      });
+      navigator.serviceWorker.addEventListener("message",event=>{
+        const d=event.data||{};
+        if(d.type==="UPDATE_PROGRESS") showUpdateProgress(d.percent,d.text);
+        if(d.type==="UPDATE_READY") showUpdateProgress(96,"Applicazione dell'aggiornamento…");
+        if(d.type==="UPDATE_COMPLETE") hideUpdateProgress();
+      });
+      navigator.serviceWorker.addEventListener("controllerchange",()=>hideUpdateProgress());
+    }catch(e){
+      console.warn("Service Worker non disponibile",e);
+    }
+  });
+}
 
 <script>
 function renderLabResults(rows){
@@ -197,7 +264,7 @@ document.getElementById("simulateLab").addEventListener("click",()=>{
 const _renderData=renderData;
 renderData=function(data){window.__LABDATA=data;_renderData(data)};
 </script>
-if("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));
+
 </script>
 </body>
 </html>

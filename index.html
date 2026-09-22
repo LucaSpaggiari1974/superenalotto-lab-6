@@ -50,7 +50,7 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 </div>
 <button class="btn primary" id="generateLab" style="width:100%;margin-top:10px">Genera giocate consigliate</button>
 <div id="labResults" style="margin-top:14px"></div>
-<div class="actions" style="margin-top:10px"><button class="btn secondary" id="simulateLab">Analisi Monte Carlo 20.000</button><button class="btn secondary" id="refreshLab">Ricalcola</button></div>
+<div class="actions" style="margin-top:10px"><button class="btn secondary" id="simulateLab">Analisi Monte Carlo 20.000</button><button class="btn secondary" id="backtestLab">Test storico</button><button class="btn secondary" id="refreshLab">Ricalcola</button></div>
 <div id="labExplain" class="hint"></div>
 </section>
 
@@ -181,6 +181,13 @@ function runLab(){
 }
 document.getElementById("generateLab").addEventListener("click",runLab);
 document.getElementById("refreshLab").addEventListener("click",runLab);
+document.getElementById("backtestLab").addEventListener("click",()=>{
+ if(!window.__LABDATA)return;
+ const mode=document.getElementById("profile").value;
+ const r=window.LAB6Math.build(window.__LABDATA).backtest(mode);
+ document.getElementById("labResults").innerHTML='<div class="latest"><strong>Backtest walk-forward · '+r.draws+' concorsi</strong><div class="statline"><span>Media numeri centrati</span><span>'+r.avg.toFixed(3)+'</span></div><div class="statline"><span>Giocate con ≥2</span><span>'+(r.hit2*100).toFixed(1)+'%</span></div><div class="statline"><span>Giocate con ≥3</span><span>'+(r.hit3*100).toFixed(1)+'%</span></div><div class="statline"><span>Giocate con ≥4</span><span>'+(r.hit4*100).toFixed(1)+'%</span></div><div class="statline"><span>Giocate con ≥5</span><span>'+(r.hit5*100).toFixed(2)+'%</span></div><div class="statline"><span>Massimo storico nel test</span><span>'+r.max+'</span></div></div>';
+ document.getElementById("labExplain").textContent="Il backtest usa solo dati precedenti a ciascun concorso per evitare di usare il futuro. Serve a scoprire quali modelli hanno funzionato meglio nello storico, non a garantire il prossimo risultato.";
+});
 document.getElementById("simulateLab").addEventListener("click",()=>{
  if(!window.__LABDATA)return;
  const a=window.LAB6Math.build(window.__LABDATA).simulate(document.getElementById("profile").value,20000).slice(0,10);

@@ -38,8 +38,8 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 </div>
 <main>
 <section class="card">
-<h1>SuperEnalotto LAB 6</h1>
-<p class="sub">Seleziona 6 numeri oppure lascia che LAB 6 li generi.</p>
+<h1>SuperEnalotto LAB 6 <span style="font-size:11px;color:#6b7280;font-weight:700;vertical-align:middle">v13</span></h1>
+<p class="sub">Motore LAB 6 aggiornato: statistica + Monte Carlo + ottimizzazione delle giocate.</p>
 <div class="count" id="count">0 / 6 selezionati</div>
 <div class="grid" id="grid"></div>
 <details class="hint" style="margin:0 0 16px"><summary><strong>📲 Installa su iPhone</strong></summary><div style="margin-top:10px">Apri questa pagina in <strong>Safari</strong>, tocca <strong>Condividi</strong>, poi <strong>Aggiungi alla schermata Home</strong>. Dopo l’installazione LAB 6 si apre a schermo intero come un’app. Non serve un Mac.</div></details>\n<div class="actions">
@@ -61,7 +61,7 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 <select id="profile" class="btn secondary" style="width:100%;appearance:auto"><option value="integrata">LAB Integrata — Motore unico</option></select>
 <select id="howMany" class="btn secondary" style="width:100%;appearance:auto"><option>5</option><option selected>10</option><option>15</option><option>20</option></select>
 </div>
-<button class="btn primary" id="generateLab" style="width:100%;margin-top:10px">Genera giocate consigliate</button>
+<button class="btn primary" id="generateLab" style="width:100%;margin-top:10px">🧠 Genera giocate LAB 6</button>
 <div id="labResults" style="margin-top:14px"></div>
 <div class="actions" style="margin-top:10px"><button class="btn secondary" id="backtestLab">Verifica storico</button><button class="btn secondary" id="refreshLab">Ricalcola giocate</button></div>
 <div id="labExplain" class="hint"></div>
@@ -219,7 +219,7 @@ if("serviceWorker" in navigator){
         if(d.type==="UPDATE_READY") showUpdateProgress(96,"Applicazione dell'aggiornamento…");
         if(d.type==="UPDATE_COMPLETE") hideUpdateProgress();
       });
-      navigator.serviceWorker.addEventListener("controllerchange",()=>hideUpdateProgress());
+      navigator.serviceWorker.addEventListener("controllerchange",()=>{ showUpdateProgress(100,"Versione aggiornata. Riavvio LAB 6…"); setTimeout(()=>location.reload(),350); });
     }catch(e){
       console.warn("Service Worker non disponibile",e);
     }

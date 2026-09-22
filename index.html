@@ -43,8 +43,7 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 <div class="count" id="count">0 / 6 selezionati</div>
 <div class="grid" id="grid"></div>
 <details class="hint" style="margin:0 0 16px"><summary><strong>📲 Installa su iPhone</strong></summary><div style="margin-top:10px">Apri questa pagina in <strong>Safari</strong>, tocca <strong>Condividi</strong>, poi <strong>Aggiungi alla schermata Home</strong>. Dopo l’installazione LAB 6 si apre a schermo intero come un’app. Non serve un Mac.</div></details>\n<div class="actions">
-<button class="btn primary" id="generate">Genera combinazione</button>
-<button class="btn secondary" id="reset">Azzera</button>
+<button class="btn primary" id="generate">🧠 Genera giocate LAB 6</button>
 </div>
 <div class="result">
 <strong>Combinazione</strong>
@@ -52,21 +51,19 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 <div id="analysis" class="hint" style="margin-top:12px">Genera una combinazione per vedere il criterio.</div>
 </div>
 <div class="status" id="status">Aggiornamento dati in corso…</div>
-<p class="hint">I dati vengono richiesti nuovamente ogni volta che apri l'app. Le statistiche descrivono le estrazioni passate e non prevedono i risultati futuri.</p>
+<p class="hint">LAB 6 utilizza un unico motore matematico per generare automaticamente le sestine. Il modello combina dati storici, andamento recente, ritardi, co-occorrenze, distribuzione e simulazioni, con validazione storica quando disponibile.</p>
 </section>
 
 <section class="card" id="labEngine">
 <h2>🧠 Motore matematico LAB 6</h2>
-<p class="hint" style="margin-top:0">Genera più giocate con modelli diversi. Il punteggio ordina le combinazioni secondo gli indicatori storici; non cambia la probabilità matematica reale di una sestina.</p>
+<p class="hint" style="margin-top:0"><strong>Motore matematico LAB 6</strong>: unico sistema di calcolo per selezionare e ordinare automaticamente le giocate. Utilizza più indicatori contemporaneamente e diversifica le sestine per evitare combinazioni quasi identiche.</p>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-<select id="profile" class="btn secondary" style="width:100%;appearance:auto">
-<option value="integrata">LAB Integrata</option><option value="ritardi">Ritardi</option><option value="caldi">Numeri caldi</option><option value="freddi">Numeri freddi</option><option value="statistica">Statistica</option><option value="montecarlo">Monte Carlo</option><option value="fortuna">Fortuna</option>
-</select>
+<select id="profile" class="btn secondary" style="width:100%;appearance:auto"><option value="integrata">LAB Integrata — Motore unico</option></select>
 <select id="howMany" class="btn secondary" style="width:100%;appearance:auto"><option>5</option><option selected>10</option><option>15</option><option>20</option></select>
 </div>
 <button class="btn primary" id="generateLab" style="width:100%;margin-top:10px">Genera giocate consigliate</button>
 <div id="labResults" style="margin-top:14px"></div>
-<div class="actions" style="margin-top:10px"><button class="btn secondary" id="simulateLab">Analisi Monte Carlo 20.000</button><button class="btn secondary" id="backtestLab">Test storico</button><button class="btn secondary" id="refreshLab">Ricalcola</button></div>
+<div class="actions" style="margin-top:10px"><button class="btn secondary" id="backtestLab">Verifica storico</button><button class="btn secondary" id="refreshLab">Ricalcola giocate</button></div>
 <div id="labExplain" class="hint"></div>
 </section>
 
@@ -239,7 +236,7 @@ function renderLabResults(rows){
 }
 function runLab(){
  if(!window.LAB6Math||!window.__LABDATA)return;
- const mode=document.getElementById("profile").value,n=+document.getElementById("howMany").value;
+ const mode="integrata",n=+document.getElementById("howMany").value;
  const rows=window.LAB6Math.build(window.__LABDATA).generate(mode,n);
  renderLabResults(rows);
  const p=window.LAB6Math.build(window.__LABDATA).profiles.find(x=>x[0]===mode);
@@ -249,16 +246,10 @@ document.getElementById("generateLab").addEventListener("click",runLab);
 document.getElementById("refreshLab").addEventListener("click",runLab);
 document.getElementById("backtestLab").addEventListener("click",()=>{
  if(!window.__LABDATA)return;
- const mode=document.getElementById("profile").value;
+ const mode="integrata";
  const r=window.LAB6Math.build(window.__LABDATA).backtest(mode);
  document.getElementById("labResults").innerHTML='<div class="latest"><strong>Backtest walk-forward · '+r.draws+' concorsi</strong><div class="statline"><span>Media numeri centrati</span><span>'+r.avg.toFixed(3)+'</span></div><div class="statline"><span>Giocate con ≥2</span><span>'+(r.hit2*100).toFixed(1)+'%</span></div><div class="statline"><span>Giocate con ≥3</span><span>'+(r.hit3*100).toFixed(1)+'%</span></div><div class="statline"><span>Giocate con ≥4</span><span>'+(r.hit4*100).toFixed(1)+'%</span></div><div class="statline"><span>Giocate con ≥5</span><span>'+(r.hit5*100).toFixed(2)+'%</span></div><div class="statline"><span>Massimo storico nel test</span><span>'+r.max+'</span></div></div>';
  document.getElementById("labExplain").textContent="Il backtest usa solo dati precedenti a ciascun concorso per evitare di usare il futuro. Serve a scoprire quali modelli hanno funzionato meglio nello storico, non a garantire il prossimo risultato.";
-});
-document.getElementById("simulateLab").addEventListener("click",()=>{
- if(!window.__LABDATA)return;
- const a=window.LAB6Math.build(window.__LABDATA).simulate(document.getElementById("profile").value,20000).slice(0,10);
- document.getElementById("labResults").innerHTML='<div class="latest"><strong>Top 10 simulazione</strong><div style="margin-top:8px">'+a.map(x=>'<div class="statline"><span><strong>'+x.numero+'</strong></span><span>'+x.simulazioni+' / 20.000 · '+(x.simFreq*100).toFixed(2)+'%</span></div>').join('')+'</div></div>';
- document.getElementById("labExplain").textContent="Monte Carlo: frequenze del campionamento ponderato dal modello selezionato. Non sono probabilità predittive dell'estrazione reale.";
 });
 const _renderData=renderData;
 renderData=function(data){window.__LABDATA=data;_renderData(data)};

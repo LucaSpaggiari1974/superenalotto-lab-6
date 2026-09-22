@@ -6,19 +6,19 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 
 STATS_URL = "https://www.superenalotto.it/archivio-estrazioni/statistiche"
 ARCHIVE_URL = "https://www.superenalotto.it/archivio-estrazioni"
-
+MONTHS = [
+    "gennaio","febbraio","marzo","aprile","maggio","giugno",
+    "luglio","agosto","settembre","ottobre","novembre","dicembre"
+]
+HISTORY_TARGET = 180
 
 def clean(value):
     return re.sub(r"\s+", " ", value or "").strip()
 
-
 def numbers_from(text):
     return [int(x) for x in re.findall(r"(?<!\d)(?:[1-9]|[1-8]\d|90)(?!\d)", text)]
 
-
-def open_page(page, url, wait_ms=5000):
-    # Il sito ufficiale può tenere la connessione aperta a lungo.
-    # "commit" evita di far fallire il job mentre la pagina continua a caricarsi.
+def open_page(page, url, wait_ms=3500):
     page.goto(url, wait_until="commit", timeout=30000)
     try:
         page.wait_for_load_state("domcontentloaded", timeout=30000)
@@ -26,10 +26,8 @@ def open_page(page, url, wait_ms=5000):
         pass
     page.wait_for_timeout(wait_ms)
 
-
 def scrape_stats(page):
-    open_page(page, STATS_URL, wait_ms=6000)
-
+    open_page(page, STATS_URL, wait_ms=5000)
     rows = []
     for row in page.locator("table tr").all():
         cells = [clean(x) for x in row.locator("th,td").all_inner_texts()]
@@ -47,47 +45,55 @@ def scrape_stats(page):
             if mm:
                 nums.append(int(mm.group(1)))
         if len(nums) >= 3 and 200 <= nums[0] <= 400 and nums[1] <= 500 and nums[2] <= 500:
-            rows.append({
-                "numero": n,
-                "frequenza": nums[0],
-                "ritardo": nums[1],
-                "ritardo_massimo": nums[2],
-            })
-
+            rows.append({"numero": n, "frequenza": nums[0], "ritardo": nums[1], "ritardo_massimo": nums[2]})
     unique = {r["numero"]: r for r in rows}
     if len(unique) != 90:
         raise RuntimeError(f"Statistiche ufficiali incomplete: trovati {len(unique)} numeri")
     return [unique[n] for n in range(1, 91)]
 
-
-def scrape_draws(page):
-    open_page(page, ARCHIVE_URL, wait_ms=5000)
-
+def parse_draw_rows(page):
     draws = []
     for row in page.locator("table tr").all():
         cells = [clean(x) for x in row.locator("th,td").all_inner_texts()]
         if len(cells) < 2:
             continue
-
         m = re.search(r"Concorso\s*[Nnº°]*\s*(\d+)\s+del\s+(.+?\d{4})$", cells[0])
         if not m:
             continue
-
         nums = numbers_from(cells[1])
         if len(nums) != 6 or len(set(nums)) != 6:
             continue
-
         draws.append({
             "numero_concorso": int(m.group(1)),
             "descrizione": cells[0],
             "numeri": sorted(nums),
         })
+    return draws
 
-    unique = {d["numero_concorso"]: d for d in draws}
-    if not unique:
-        raise RuntimeError("Nessuna estrazione trovata nell'archivio ufficiale")
-    return sorted(unique.values(), key=lambda d: d["numero_concorso"], reverse=True)[:30]
+def scrape_draws(page):
+    # L'archivio principale espone gli ultimi 30; le pagine mensili ufficiali
+    # permettono di estendere lo storico senza usare fonti di terze parti.
+    all_draws = {}
+    open_page(page, ARCHIVE_URL, wait_ms=3500)
+    for d in parse_draw_rows(page):
+        all_draws[d["numero_concorso"]] = d
 
+    year = datetime.now(timezone.utc).year
+    for month in reversed(MONTHS):
+        if len(all_draws) >= HISTORY_TARGET:
+            break
+        url = f"{ARCHIVE_URL}/{year}/{month}"
+        try:
+            open_page(page, url, wait_ms=2200)
+            for d in parse_draw_rows(page):
+                all_draws[d["numero_concorso"]] = d
+        except Exception as exc:
+            print(f"Avviso: pagina {month} non disponibile: {exc}")
+
+    if len(all_draws) < HISTORY_TARGET:
+        raise RuntimeError(f"Storico ufficiale insufficiente: trovati {len(all_draws)} concorsi, richiesti almeno {HISTORY_TARGET}")
+
+    return sorted(all_draws.values(), key=lambda d: d["numero_concorso"], reverse=True)[:HISTORY_TARGET]
 
 def main():
     with sync_playwright() as p:
@@ -108,21 +114,16 @@ def main():
         "updated_at": datetime.now(timezone.utc).isoformat(),
         "source": STATS_URL,
         "source_archivio": ARCHIVE_URL,
+        "storico_concorsi": len(draws),
         "stats": stats,
         "ultime_estrazioni": [
-            {
-                "descrizione": d["descrizione"],
-                "numeri": d["numeri"],
-            }
+            {"descrizione": d["descrizione"], "numeri": d["numeri"]}
             for d in draws
         ],
     }
-
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-
     print(f"OK: {len(stats)} statistiche e {len(draws)} estrazioni aggiornate")
-
 
 if __name__ == "__main__":
     main()

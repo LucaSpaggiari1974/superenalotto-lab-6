@@ -73,6 +73,7 @@ function statLine(n,v){return '<div class="statline"><span><strong>'+n+'</strong
 function renderData(data){
  currentData=data; window.__LABDATA=data;
  const stats=data.stats||[];
+ renderLockedPlays();
  document.getElementById("hot").innerHTML=[...stats].sort((a,b)=>(b.frequenza||0)-(a.frequenza||0)).slice(0,6).map(s=>statLine(s.numero,s.frequenza)).join("")||"—";
  document.getElementById("cold").innerHTML=[...stats].sort((a,b)=>(b.ritardo||0)-(a.ritardo||0)).slice(0,6).map(s=>statLine(s.numero,s.ritardo)).join("")||"—";
  document.getElementById("allstats").innerHTML=stats.map(s=>'<tr><td><strong>'+s.numero+'</strong></td><td>'+s.frequenza+'</td><td>'+s.ritardo+'</td><td>'+s.ritardo_massimo+'</td></tr>').join("");

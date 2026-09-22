@@ -1,5 +1,5 @@
-const CACHE="lab6-v19";
-const ASSETS=["./","./index.html","./lab-engine.js?v=16","./manifest.webmanifest","./data.json"];
+const CACHE="lab6-v20";
+const ASSETS=["./","./index.html","./lab-engine.js?v=17","./manifest.webmanifest","./data.json"];
 async function notify(type,percent,text){const clientsList=await self.clients.matchAll({includeUncontrolled:true,type:"window"});clientsList.forEach(c=>c.postMessage({type,percent,text}))}
 self.addEventListener("install",event=>event.waitUntil((async()=>{const cache=await caches.open(CACHE);for(const asset of ASSETS){try{await cache.add(asset)}catch(e){console.warn("Cache asset",asset,e)}}await self.skipWaiting()})()));
 self.addEventListener("activate",event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));

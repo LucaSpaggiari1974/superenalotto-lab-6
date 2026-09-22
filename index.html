@@ -40,7 +40,7 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 <div id="labResults" class="result"><div class="hint">Premi il pulsante per generare le giocate elaborate dal motore LAB 6.</div></div>
 <div id="playControls" style="display:none;margin-top:12px">
 <div class="hint" style="margin-bottom:8px"><strong>Selezione giocata</strong> · spunta le combinazioni che vuoi realmente giocare, poi bloccale. Le giocate bloccate restano salvate anche dopo la chiusura dell'app.</div>
-<div class="controls"><button class="btn secondary" id="selectAllPlays">Seleziona tutte</button><button class="btn secondary" id="lockPlays">🔒 Blocca giocate selezionate</button></div>
+<div class="controls"><button class="btn secondary" id="selectAllPlays">Seleziona tutte</button><button class="btn secondary" id="lockPlays">🔒 Blocca giocate selezionate</button></div><button class="btn secondary full" id="clearLockedPlays">🗑️ Azzera giocate bloccate</button>
 </div>
 <div id="lockedPlays" class="result" style="display:none"></div>
 <div class="controls" style="margin-top:10px"><button class="btn secondary" id="backtestLab">Verifica storico</button><button class="btn secondary" id="refreshLab">Ricalcola</button></div>
@@ -140,7 +140,7 @@ document.getElementById("backtestLab").addEventListener("click",()=>{
  document.getElementById("labExplain").textContent="Backtest walk-forward: ogni test usa soltanto dati disponibili prima del concorso considerato.";
 });
 document.getElementById("selectAllPlays").addEventListener("click",()=>{document.querySelectorAll(".playCheck").forEach(x=>x.checked=true)});
-document.getElementById("lockPlays").addEventListener("click",()=>{
+document.getElementById("clearLockedPlays").addEventListener("click",()=>{if(!lockedPlays.length){document.getElementById("labExplain").textContent="Non ci sono giocate bloccate da eliminare.";return} if(confirm("Vuoi eliminare tutte le giocate bloccate?")){lockedPlays=[];saveLocked();renderLockedPlays();document.getElementById("labExplain").innerHTML="<strong>Giocate azzerate.</strong> Tutte le giocate bloccate sono state eliminate."}});\ndocument.getElementById("lockPlays").addEventListener("click",()=>{
  const selected=[...document.querySelectorAll(".playCheck:checked")].map(x=>currentGeneratedRows[+x.dataset.index]).filter(Boolean);
  if(!selected.length){document.getElementById("labExplain").textContent="Seleziona almeno una combinazione prima di bloccare le giocate.";return}
  const existing=new Set(lockedPlays.map(x=>x.numeri.join("-")));

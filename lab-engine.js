@@ -95,24 +95,37 @@ function comboScore(nums,scored,pm,tm){
  const numberScore=nums.reduce((a,n)=>a+by.get(n).score,0)/6;
  return numberScore*.48+balance*.14+sumShape*.10+Math.min(1,pairs/12)*.10+Math.min(1,triples/8)*.06+decade*.06+spread*.06;
 }
+function portfolioScore(candidate,out){
+  if(!out.length)return candidate.punteggio;
+  const nums=new Set(candidate.numeri);
+  let overlap=0;
+  for(const row of out) overlap+=candidate.numeri.filter(n=>row.numeri.includes(n)).length;
+  const avgOverlap=overlap/(out.length*6);
+  return candidate.punteggio*(1-0.55*avgOverlap);
+}
 function generate(data,count=8){
  const scored=integratedScores(data),pm=pairMap(data),tm=tripleMap(data),candidates=[],seen=new Set();
- const target=Math.min(30,Math.max(1,count)),poolSize=Math.max(2500,target*250);
+ const target=Math.min(30,Math.max(1,count)),poolSize=Math.max(12000,target*1000);
  for(let i=0;i<poolSize;i++){
    const nums=weightedPick(scored,6),key=nums.join("-");
    if(seen.has(key))continue;
    seen.add(key);candidates.push({numeri:nums,punteggio:comboScore(nums,scored,pm,tm)});
  }
- candidates.sort((a,b)=>b.punteggio-a.punteggio);
  const out=[];
- for(const c of candidates){
-   if(out.length>=target)break;
-   const overlap=out.some(x=>x.numeri.filter(n=>c.numeri.includes(n)).length>=4);
-   if(!overlap)out.push({...c,profilo:"LAB 6 Integrata + Monte Carlo"});
+ while(out.length<target&&candidates.length){
+   let best=-1,bestScore=-Infinity;
+   for(let i=0;i<candidates.length;i++){
+     const c=candidates[i],s=portfolioScore(c,out);
+     if(s>bestScore){bestScore=s;best=i;}
+   }
+   if(best<0)break;
+   const c=candidates.splice(best,1)[0];
+   const maxOverlap=out.reduce((m,x)=>Math.max(m,c.numeri.filter(n=>x.numeri.includes(n)).length),0);
+   if(maxOverlap<=3||out.length<2)out.push({...c,portafoglioScore:portfolioScore(c,out),profilo:"LAB 6 Integrata + Monte Carlo"});
  }
  return out;
 }
-function simulate(data,runs=20000){
+function simulate(data,runs=50000){
  const scored=integratedScores(data),counts=new Map(Array.from({length:90},(_,i)=>[i+1,0]));
  for(let i=0;i<runs;i++)weightedPick(scored,6).forEach(n=>counts.set(n,counts.get(n)+1));
  return scored.map(x=>({...x,simulazioni:counts.get(x.numero),simFreq:counts.get(x.numero)/runs}))

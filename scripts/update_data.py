@@ -14,7 +14,7 @@ def numbers_from(text):
     return [int(x) for x in re.findall(r"(?<!\d)(?:[1-9]|[1-8]\d|90)(?!\d)", text)]
 
 def open_page(page, url, wait_ms=5000):
-    page.goto(url, wait_until="commit", timeout=30000)
+    page.goto(url, wait_until="domcontentloaded", timeout=30000)
     try:
         page.wait_for_load_state("domcontentloaded", timeout=30000)
     except PlaywrightTimeoutError:

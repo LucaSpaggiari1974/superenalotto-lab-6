@@ -29,11 +29,14 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 <section class="card">
 <h1>SuperEnalotto LAB 6 <span style="font-size:11px;color:#6b7280;font-weight:700;vertical-align:middle">v15</span></h1>
 <p class="sub">🧠 Motore unico: statistica + Monte Carlo + backtest + ottimizzazione del portafoglio.</p>
+<div class="hint" style="margin-bottom:10px">Ogni combinazione costa €1 secondo le regole ufficiali; il modo diretto per aumentare la copertura è giocare più combinazioni distinte.</div>
 <div class="controls">
 <select id="profile" class="btn secondary"><option value="integrata">LAB 6 — Motore unico</option></select>
 <select id="howMany" class="btn secondary"><option>5</option><option selected>10</option><option>15</option><option>20</option></select>
+<select id="budget" class="btn secondary"><option value="10">Budget €10</option><option value="20">Budget €20</option><option value="50">Budget €50</option><option value="100">Budget €100</option></select>
 </div>
 <button class="btn primary full" id="generateLab">🧠 Genera giocate LAB 6</button>
+<button class="btn secondary full" id="generateBudget">💶 Massima copertura · budget</button>
 <div id="labResults" class="result"><div class="hint">Premi il pulsante per generare le giocate elaborate dal motore LAB 6.</div></div>
 <div class="controls" style="margin-top:10px"><button class="btn secondary" id="backtestLab">Verifica storico</button><button class="btn secondary" id="refreshLab">Ricalcola</button></div>
 <div id="labExplain" class="hint" style="margin-top:12px"></div>
@@ -90,6 +93,12 @@ function runLab(){
  document.getElementById("labExplain").innerHTML='<strong>'+p[1]+':</strong> '+p[2]+'<br>Il motore usa finestre 10/30/100/180, frequenza smussata, ritardi, co-occorrenze normalizzate, struttura empirica delle sestine, simulazione stocastica, backtest e diversificazione.';
 }
 document.getElementById("generateLab").addEventListener("click",runLab);
+document.getElementById("generateBudget").addEventListener("click",()=>{
+ if(!window.LAB6Math||!window.__LABDATA)return;
+ const budget=+document.getElementById("budget").value,engine=window.LAB6Math.build(window.__LABDATA),r=engine.generateBudget(budget);
+ renderLabResults(r.rows);
+ document.getElementById("labExplain").innerHTML="<strong>Massima copertura · €"+budget+":</strong> "+r.count+" combinazioni distinte da 1€ ciascuna, costruite con diversificazione e sovrapposizione contenuta. Il budget aumenta il numero di combinazioni, non la probabilità intrinseca di una singola sestina."; 
+});
 document.getElementById("refreshLab").addEventListener("click",runLab);
 document.getElementById("howMany").addEventListener("change",runLab);
 document.getElementById("backtestLab").addEventListener("click",()=>{

@@ -38,6 +38,11 @@ footer{text-align:center;color:#9ca3af;font-size:11px;margin-top:16px}
 <button class="btn primary full" id="generateLab">🧠 Genera giocate LAB 6</button>
 <button class="btn secondary full" id="generateBudget">💶 Massima copertura · budget</button>
 <div id="labResults" class="result"><div class="hint">Premi il pulsante per generare le giocate elaborate dal motore LAB 6.</div></div>
+<div id="playControls" style="display:none;margin-top:12px">
+<div class="hint" style="margin-bottom:8px"><strong>Selezione giocata</strong> · spunta le combinazioni che vuoi realmente giocare, poi bloccale. Le giocate bloccate restano salvate anche dopo la chiusura dell'app.</div>
+<div class="controls"><button class="btn secondary" id="selectAllPlays">Seleziona tutte</button><button class="btn secondary" id="lockPlays">🔒 Blocca giocate selezionate</button></div>
+</div>
+<div id="lockedPlays" class="result" style="display:none"></div>
 <div class="controls" style="margin-top:10px"><button class="btn secondary" id="backtestLab">Verifica storico</button><button class="btn secondary" id="refreshLab">Ricalcola</button></div>
 <div id="labExplain" class="hint" style="margin-top:12px"></div>
 <div class="status" id="status">Controllo dati…</div>
@@ -81,9 +86,35 @@ async function loadData(){
  try{const r=await fetch("./data.json?refresh="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("HTTP "+r.status);renderData(await r.json());runLab();}
  catch(e){document.getElementById("status").textContent="Dati locali non disponibili: impossibile aggiornare.";document.getElementById("status").className="status err";}
 }
+let currentGeneratedRows=[];
+let lockedPlays=[];
+try{lockedPlays=JSON.parse(localStorage.getItem("lab6LockedPlays")||"[]")}catch(e){lockedPlays=[]}
+function saveLocked(){try{localStorage.setItem("lab6LockedPlays",JSON.stringify(lockedPlays))}catch(e){}}
 function renderLabResults(rows){
+ currentGeneratedRows=Array.isArray(rows)?rows:[];
  const box=document.getElementById("labResults");
- box.innerHTML=rows.map((r,i)=>'<div class="latest"><strong>Giocata '+(i+1)+' · indice '+(r.punteggio*100).toFixed(1)+'/100</strong><div class="balls" style="margin-top:8px">'+r.numeri.map(n=>'<span class="ball">'+n+'</span>').join("")+'</div></div>').join("")||'<div class="hint">Nessuna combinazione.</div>';
+ box.innerHTML=currentGeneratedRows.map((r,i)=>'<label class="latest" style="display:block;cursor:pointer"><div style="display:flex;align-items:center;gap:9px"><input class="playCheck" type="checkbox" data-index="'+i+'" style="width:20px;height:20px;flex:0 0 auto"><strong>Giocata '+(i+1)+' · indice '+(r.punteggio*100).toFixed(1)+'/100</strong></div><div class="balls" style="margin-top:8px">'+r.numeri.map(n=>'<span class="ball">'+n+'</span>').join("")+'</div></label>').join("")||'<div class="hint">Nessuna combinazione.</div>';
+ document.getElementById("playControls").style.display=currentGeneratedRows.length?"block":"none";
+}
+function comparePlay(nums,latest){
+ const actual=new Set(latest?.numeri||[]),hits=nums.filter(n=>actual.has(n)).length;
+ const jolly=latest?.jolly!=null&&nums.includes(Number(latest.jolly));
+ let cat="Nessuna vincita";
+ if(hits===6)cat="6";
+ else if(hits===5&&jolly)cat="5+1";
+ else if(hits===5)cat="5";
+ else if(hits===4)cat="4";
+ else if(hits===3)cat="3";
+ else if(hits===2)cat="2";
+ return {hits,jolly,cat};
+}
+function renderLockedPlays(){
+ const box=document.getElementById("lockedPlays");
+ if(!lockedPlays.length){box.style.display="none";box.innerHTML="";return}
+ box.style.display="block";
+ const latest=(currentData?.ultime_estrazioni||[])[0];
+ const title=latest?latest.descrizione:"Ultima estrazione non disponibile";
+ box.innerHTML='<div class="latest"><strong>🔒 Giocate bloccate · '+lockedPlays.length+'</strong><div class="hint" style="margin:5px 0 10px">Confronto automatico con '+title+'.</div>'+lockedPlays.map((p,i)=>{const v=comparePlay(p.numeri,latest);const label=v.hits>=2?'VINCENTE · '+v.cat+' numeri':'Non vincente · '+v.hits+' numeri';return '<div style="padding:10px 0;border-top:1px solid #e5e7eb"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><strong>Giocata '+(i+1)+'</strong><span style="font-size:12px;font-weight:800">'+label+'</span></div><div class="balls" style="margin-top:8px">'+p.numeri.map(n=>'<span class="ball">'+n+'</span>').join("")+'</div><div class="hint" style="margin-top:6px">Numeri centrati: '+v.hits+(v.jolly?' · Jolly centrato':'')+'</div></div>'}).join("")+'</div>';
 }
 function runLab(){
  if(!window.LAB6Math||!window.__LABDATA)return;
@@ -107,6 +138,15 @@ document.getElementById("backtestLab").addEventListener("click",()=>{
  document.getElementById("labResults").innerHTML='<div class="latest"><strong>Backtest walk-forward · '+r.draws+' concorsi</strong>'+statLine("Media numeri centrati",r.avg.toFixed(3))+statLine("Giocate con ≥2",(r.hit2*100).toFixed(1)+"%")+statLine("Giocate con ≥3",(r.hit3*100).toFixed(1)+"%")+statLine("Giocate con ≥4",(r.hit4*100).toFixed(1)+"%")+statLine("Giocate con ≥5",(r.hit5*100).toFixed(2)+"%")+statLine("Media baseline casuale",r.baselineAvg.toFixed(3))+statLine("Indice vs baseline",r.lift.toFixed(2)+"×")+statLine("Massimo storico nel test",r.max)+'</div>';
  document.getElementById("labExplain").textContent="Backtest walk-forward: ogni test usa soltanto dati disponibili prima del concorso considerato.";
 });
+document.getElementById("selectAllPlays").addEventListener("click",()=>{document.querySelectorAll(".playCheck").forEach(x=>x.checked=true)});
+document.getElementById("lockPlays").addEventListener("click",()=>{
+ const selected=[...document.querySelectorAll(".playCheck:checked")].map(x=>currentGeneratedRows[+x.dataset.index]).filter(Boolean);
+ if(!selected.length){document.getElementById("labExplain").textContent="Seleziona almeno una combinazione prima di bloccare le giocate.";return}
+ const existing=new Set(lockedPlays.map(x=>x.numeri.join("-")));
+ selected.forEach(r=>{const key=r.numeri.join("-");if(!existing.has(key)){lockedPlays.push({numeri:r.numeri.slice(),createdAt:new Date().toISOString()});existing.add(key)}});
+ saveLocked();renderLockedPlays();document.getElementById("labExplain").innerHTML="<strong>🔒 Giocate bloccate:</strong> "+lockedPlays.length+". Ora sono fissate e vengono confrontate automaticamente con l'ultima estrazione disponibile.";
+});
+renderLockedPlays();
 loadData();
 if("serviceWorker" in navigator){window.addEventListener("load",async()=>{try{
  navigator.serviceWorker.addEventListener("controllerchange",()=>{setTimeout(()=>location.reload(),100)});

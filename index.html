@@ -233,7 +233,6 @@ if("serviceWorker" in navigator){
   });
 }
 
-<script>
 function renderLabResults(rows){
  const box=document.getElementById("labResults");
  box.innerHTML=rows.map((r,i)=>'<div class="latest" style="margin-bottom:8px"><strong>Giocata '+(i+1)+' · indice '+(r.punteggio*100).toFixed(1)+'/100</strong><div class="balls" style="justify-content:flex-start;margin-top:8px">'+r.numeri.map(n=>'<span class="ball">'+n+'</span>').join('')+'</div></div>').join('')||'<div class="hint">Nessuna combinazione.</div>';
@@ -263,8 +262,6 @@ document.getElementById("simulateLab").addEventListener("click",()=>{
 });
 const _renderData=renderData;
 renderData=function(data){window.__LABDATA=data;_renderData(data)};
-</script>
-
 </script>
 </body>
 </html>

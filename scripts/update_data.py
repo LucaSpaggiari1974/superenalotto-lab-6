@@ -71,24 +71,29 @@ def parse_draw_rows(page):
     return draws
 
 def scrape_draws(page):
-    # L'archivio principale espone gli ultimi 30; le pagine mensili ufficiali
-    # permettono di estendere lo storico senza usare fonti di terze parti.
+    # L'archivio ufficiale permette di espandere progressivamente lo storico
+    # con il controllo "Mostra gli altri 15 concorsi". Usiamo solo la fonte
+    # ufficiale e deduplichiamo per numero di concorso.
     all_draws = {}
     open_page(page, ARCHIVE_URL, wait_ms=3500)
-    for d in parse_draw_rows(page):
-        all_draws[d["numero_concorso"]] = d
 
-    year = datetime.now(timezone.utc).year
-    for month in reversed(MONTHS):
+    for _ in range(12):
+        for d in parse_draw_rows(page):
+            all_draws[d["numero_concorso"]] = d
         if len(all_draws) >= HISTORY_TARGET:
             break
-        url = f"{ARCHIVE_URL}/{year}/{month}"
         try:
-            open_page(page, url, wait_ms=2200)
-            for d in parse_draw_rows(page):
-                all_draws[d["numero_concorso"]] = d
+            buttons = page.get_by_text(re.compile(r"Mostra gli altri 15 concorsi", re.I))
+            if buttons.count() == 0:
+                break
+            button = buttons.last
+            if not button.is_visible():
+                break
+            button.click(timeout=5000)
+            page.wait_for_timeout(900)
         except Exception as exc:
-            print(f"Avviso: pagina {month} non disponibile: {exc}")
+            print(f"Avviso: impossibile espandere lo storico: {exc}")
+            break
 
     if len(all_draws) < HISTORY_TARGET:
         raise RuntimeError(f"Storico ufficiale insufficiente: trovati {len(all_draws)} concorsi, richiesti almeno {HISTORY_TARGET}")

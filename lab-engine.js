@@ -111,7 +111,7 @@ function portfolioPenalty(candidate,out){
  return clamp(1-.70*avg);
 }
 function generate(data,count=10){
- const target=Math.min(50,Math.max(1,count)),model=integratedScores(data),candidates=[],seen=new Set();
+ const target=Math.min(100,Math.max(1,count)),model=integratedScores(data),candidates=[],seen=new Set();
  const poolSize=Math.max(15000,target*700);
  for(let i=0;i<poolSize;i++){
    const nums=weightedPick(model.scored,6),key=nums.join("-");

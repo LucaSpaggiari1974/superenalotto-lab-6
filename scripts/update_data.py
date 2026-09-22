@@ -95,9 +95,10 @@ def scrape_draws(page):
             print(f"Avviso: impossibile espandere lo storico: {exc}")
             break
 
+    if len(all_draws) < 30:
+        raise RuntimeError(f"Archivio ufficiale non disponibile: trovati solo {len(all_draws)} concorsi")
     if len(all_draws) < HISTORY_TARGET:
-        raise RuntimeError(f"Storico ufficiale insufficiente: trovati {len(all_draws)} concorsi, richiesti almeno {HISTORY_TARGET}")
-
+        print(f"Avviso: storico esteso non completamente disponibile ({len(all_draws)} concorsi); uso tutti quelli recuperati.")
     return sorted(all_draws.values(), key=lambda d: d["numero_concorso"], reverse=True)[:HISTORY_TARGET]
 
 def main():

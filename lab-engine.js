@@ -111,8 +111,8 @@ function portfolioPenalty(candidate,out){
  return clamp(1-.70*avg);
 }
 function generate(data,count=10){
- const target=Math.min(30,Math.max(1,count)),model=integratedScores(data),candidates=[],seen=new Set();
- const poolSize=Math.max(15000,target*1200);
+ const target=Math.min(50,Math.max(1,count)),model=integratedScores(data),candidates=[],seen=new Set();
+ const poolSize=Math.max(15000,target*700);
  for(let i=0;i<poolSize;i++){
    const nums=weightedPick(model.scored,6),key=nums.join("-");
    if(seen.has(key))continue;
@@ -147,11 +147,17 @@ function backtest(data){
  const avg=tests?total/tests:0,baselineAvg=tests?baseTotal/tests:0;
  return {draws:draws.length-15,avg,hit2:tests?hit2/tests:0,hit3:tests?hit3/tests:0,hit4:tests?hit4/tests:0,hit5:tests?hit5/tests:0,max,baselineAvg,lift:baselineAvg?avg/baselineAvg:0};
 }
+function generateBudget(data,budget){
+ const b=Math.max(1,Math.min(100,Math.floor(Number(budget)||1))),count=b;
+ const rows=generate(data,count);
+ return {budget:b,count:rows.length,rows};
+}
 function build(data){return{
  profiles:[["integrata","LAB 6 — Motore unico","Statistica multi-finestra + co-occorrenze normalizzate + simulazione + backtest + diversificazione."]],
  generate:(mode,n)=>generate(data,n),
  simulate:(mode,n)=>simulate(data,n||20000),
- backtest:(mode)=>backtest(data)
+ backtest:(mode)=>backtest(data),
+generateBudget:(budget)=>generateBudget(data,budget)
 }}
 window.LAB6Math={build,comboStats:function(nums){const s=[...nums].sort((a,b)=>a-b);return{sum:s.reduce((a,b)=>a+b,0),odd:s.filter(x=>x%2).length,low:s.filter(x=>x<=45).length,consecutive:s.slice(1).filter((x,i)=>x-s[i]===1).length,decades:new Set(s.map(x=>Math.floor((x-1)/10))).size,span:s[5]-s[0]}},choose,comboProb};
 })();

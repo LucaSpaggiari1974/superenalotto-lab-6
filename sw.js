@@ -1,4 +1,4 @@
-const CACHE="lab6-v13";
+const CACHE="lab6-v14";
 const ASSETS=["./","./index.html","./lab-engine.js","./manifest.webmanifest","./data.json"];
 
 async function notify(type,percent,text){
